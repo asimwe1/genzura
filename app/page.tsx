@@ -96,9 +96,9 @@ export default function Dashboard() {
                     <p className="text-2xl font-bold">6</p>
                     <p className="text-gray-600">/12</p>
                   </div>
-                  <Button variant="ghost" size="icon">
+                  <Button asChild variant="ghost" size="icon">
                     <DropdownMenu>
-                      <DropdownMenuTrigger>
+                      <DropdownMenuTrigger asChild>
                         <div className="flex flex-col space-y-1">
                           <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
                           <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
@@ -150,9 +150,9 @@ export default function Dashboard() {
                     <p className="text-2xl font-bold">15</p>
                     <p className="text-gray-600">/26</p>
                   </div>
-                  <Button variant="ghost" size="icon">
+                  <Button asChild variant="ghost" size="icon">
                     <DropdownMenu>
-                      <DropdownMenuTrigger>
+                      <DropdownMenuTrigger asChild>
                         <div className="flex flex-col space-y-1">
                           <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
                           <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
@@ -235,7 +235,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-7 gap-1 text-center text-sm">
-                {["S", "M", "T", "W", "T", "F", "S"].map((day) => (
+                {["S0", "M1", "T2", "W3", "T4", "F5", "S6"].map((day) => (
                   <div key={day} className="p-2 font-medium text-gray-500">
                     {day}
                   </div>
