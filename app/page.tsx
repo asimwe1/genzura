@@ -327,7 +327,7 @@ export default function Dashboard() {
             Help Center
           </a>
         </div>
-        <p>© 2024 ProServe. All rights reserved.</p>
+        <p>© 2024 InveNtory. All rights reserved.</p>
       </div>
     </div>
   )
