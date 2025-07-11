@@ -220,7 +220,7 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
-                <p className="text-gray-500">Chart visualization would go here</p>
+                <p className="text-gray-500">xhat visualization would go here</p>
               </div>
             </CardContent>
           </Card>
