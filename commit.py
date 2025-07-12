@@ -31,7 +31,6 @@ commit_templates = [
 # Get list of changed, deleted, or untracked files
 def get_changed_files():
     changed_files = []
-    # Store file statuses to handle deleted files
     file_status = {}
     
     # Modified and deleted files from git status
@@ -98,14 +97,14 @@ def create_commits(commits_per_day=5):
             
             # Stage the file based on status
             try:
-                if status == "D" and not os.path.exists(file_to_commit):
-                    repo.git.rm(file_to_commit, cached=True)  # Stage deletion without removing file
+                if status == "D":
+                    repo.git.rm(file_to_commit, cached=True)  # Stage deletion
                 elif os.path.exists(file_to_commit):
-                    repo.git.add(file_to_commit)
+                    repo.git.add(file_to_commit)  # Stage existing file
                 else:
                     print(f"Skipping {file_to_commit}: File does not exist and not marked as deleted.")
                     continue
-            
+                
                 # Generate commit message and date
                 commit_message = generate_commit_message(file_to_commit)
                 commit_date = random_date_for_day(day).strftime("%Y-%m-%dT%H:%M:%S+02:00")
@@ -113,7 +112,7 @@ def create_commits(commits_per_day=5):
                 # Commit with specified date
                 repo.git.commit(m=commit_message, date=commit_date)
                 print(f"Committed {file_to_commit} with message: {commit_message} on {commit_date}")
-            
+                
             except git.exc.GitCommandError as e:
                 print(f"Failed to commit {file_to_commit}: {e}")
                 continue
