@@ -23,7 +23,7 @@ export default function Dashboard() {
   ]
 
   return (
-    <div className="flex-1 space-y-6 p-6">
+    <div className="flex-1 space-y-3 py-2">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4 flex-1 max-w-md">
@@ -231,22 +231,22 @@ export default function Dashboard() {
           {/* Calendar */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-center">2024</CardTitle>
+              <CardTitle className="text-center">2025 - July</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-7 gap-1 text-center text-sm">
                 {["S0", "M1", "T2", "W3", "T4", "F5", "S6"].map((day) => (
-                  <div key={day} className="p-2 font-medium text-gray-500">
+                  <div key={day} className="p-1 font-medium text-gray-500">
                     {day}
                   </div>
                 ))}
-                {Array.from({ length: 35 }, (_, i) => {
-                  const day = i - 4
-                  const isToday = day === 19
+                {Array.from({ length: 34 }, (_, i) => {
+                  const day = i - 1
+                  const isToday = day === 14
                   return (
                     <div
                       key={i}
-                      className={`p-2 text-sm ${
+                      className={`p-1 text-sm ${
                         day > 0 && day <= 31
                           ? isToday
                             ? "bg-blue-600 text-white rounded-lg"
@@ -267,7 +267,7 @@ export default function Dashboard() {
             <CardHeader>
               <CardTitle>Upcoming Tasks</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent>
               {upcomingTasks.map((task, index) => (
                 <div key={index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
                   <div className="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
@@ -282,7 +282,7 @@ export default function Dashboard() {
 
           {/* Our Team */}
           <Card>
-            <CardHeader>
+            <CardHeader className="">
               <CardTitle>Our Team</CardTitle>
               <p className="text-sm text-gray-500">Team members</p>
             </CardHeader>
@@ -315,7 +315,7 @@ export default function Dashboard() {
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-6 border-t text-sm text-gray-500">
+      <div className="flex h-[2rem] items-center justify-between py-[0.5rem] border-t text-sm text-gray-500">
         <div className="flex space-x-6">
           <a href="#" className="hover:text-gray-700">
             Privacy Policy
@@ -327,7 +327,7 @@ export default function Dashboard() {
             Help Center
           </a>
         </div>
-        <p>© 2024 InveNtory. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Genzura. All rights reserved.</p>
       </div>
     </div>
   )

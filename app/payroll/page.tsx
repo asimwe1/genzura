@@ -19,8 +19,7 @@ export default function Payroll() {
       position: "Store Manager",
       department: "Management",
       baseSalary: 5500,
-      hoursWorked: 160,
-      overtime: 8,
+      tax: 5500,
       bonus: 500,
       deductions: 200,
       netPay: 5800,
@@ -33,8 +32,7 @@ export default function Payroll() {
       position: "Inventory Specialist",
       department: "Operations",
       baseSalary: 4200,
-      hoursWorked: 160,
-      overtime: 12,
+      tax: 4200,
       bonus: 200,
       deductions: 150,
       netPay: 4250,
@@ -47,8 +45,7 @@ export default function Payroll() {
       position: "Sales Associate",
       department: "Sales",
       baseSalary: 3200,
-      hoursWorked: 160,
-      overtime: 4,
+      tax: 4,
       bonus: 150,
       deductions: 120,
       netPay: 3230,
@@ -61,8 +58,7 @@ export default function Payroll() {
       position: "Accountant",
       department: "Finance",
       baseSalary: 4800,
-      hoursWorked: 160,
-      overtime: 0,
+      tax: 0,
       bonus: 300,
       deductions: 180,
       netPay: 4920,
@@ -210,8 +206,7 @@ export default function Payroll() {
                 <TableHead>Position</TableHead>
                 <TableHead>Department</TableHead>
                 <TableHead>Base Salary</TableHead>
-                <TableHead>Hours</TableHead>
-                <TableHead>Overtime</TableHead>
+                <TableHead>Tax</TableHead>
                 <TableHead>Bonus</TableHead>
                 <TableHead>Deductions</TableHead>
                 <TableHead>Net Pay</TableHead>
@@ -227,8 +222,7 @@ export default function Payroll() {
                   <TableCell>{employee.position}</TableCell>
                   <TableCell>{employee.department}</TableCell>
                   <TableCell>${employee.baseSalary}</TableCell>
-                  <TableCell>{employee.hoursWorked}h</TableCell>
-                  <TableCell>{employee.overtime}h</TableCell>
+                  <TableCell>{employee.tax}h</TableCell>
                   <TableCell>${employee.bonus}</TableCell>
                   <TableCell>${employee.deductions}</TableCell>
                   <TableCell className="font-bold">${employee.netPay}</TableCell>

@@ -3,6 +3,7 @@ import random
 from datetime import datetime, timedelta
 from pathlib import Path
 import os
+import subprocess
 
 # Initialize the Git repository
 repo_path = "."  # Adjust if your repository path differs
@@ -31,32 +32,28 @@ commit_templates = [
 # Get list of changed, deleted, or untracked files
 def get_changed_files():
     changed_files = []
-    # Store file statuses to handle deleted files
     file_status = {}
     
     # Modified and deleted files from git status
     for item in repo.git.status(["--porcelain"]).splitlines():
         status, path = item.split(maxsplit=1)
-        file_status[path] = status
-        changed_files.append(path)
+        if os.path.exists(path) or status == "D":
+            file_status[path] = status
+            changed_files.append(path)
     
-    # Untracked files
+    # Untracked files from git status
     for item in repo.untracked_files:
-        if item not in changed_files:
+        if item not in changed_files and os.path.exists(item):
             changed_files.append(item)
             file_status[item] = "??"
     
-    # Expand untracked directories to include their files
-    directories = ["app/departments/", "app/manage-store/", "app/others/", "app/payroll/", 
-                   "app/products/", "app/reports/", "app/settings/", "app/suppliers/", "hooks/"]
-    for dir_path in directories:
-        if os.path.exists(dir_path):
-            for root, _, files in os.walk(dir_path):
-                for file in files:
-                    file_path = os.path.join(root, file)
-                    if file_path not in changed_files:
-                        changed_files.append(file_path)
-                        file_status[file_path] = "??"
+    # Use find to get all existing files, excluding .next, .git, node_modules
+    find_cmd = ["find", ".", "(", "-name", ".next", "-o", "-name", ".git", "-o", "-name", "node_modules", ")", "-prune", "-o", "-type", "f", "-print"]
+    result = subprocess.run(find_cmd, capture_output=True, text=True)
+    for file_path in result.stdout.splitlines():
+        if file_path not in changed_files and os.path.exists(file_path):
+            changed_files.append(file_path)
+            file_status[file_path] = "??"
     
     # Exclude .next, .git, node_modules
     excluded = {".next", ".git", "node_modules"}
@@ -98,14 +95,14 @@ def create_commits(commits_per_day=5):
             
             # Stage the file based on status
             try:
-                if status == "D" and not os.path.exists(file_to_commit):
-                    repo.git.rm(file_to_commit, cached=True)  # Stage deletion without removing file
+                if status == "D":
+                    repo.git.rm(file_to_commit, cached=True)  # Stage deletion
                 elif os.path.exists(file_to_commit):
-                    repo.git.add(file_to_commit)
+                    repo.git.add(file_to_commit)  # Stage existing file
                 else:
                     print(f"Skipping {file_to_commit}: File does not exist and not marked as deleted.")
                     continue
-            
+                
                 # Generate commit message and date
                 commit_message = generate_commit_message(file_to_commit)
                 commit_date = random_date_for_day(day).strftime("%Y-%m-%dT%H:%M:%S+02:00")
@@ -113,7 +110,7 @@ def create_commits(commits_per_day=5):
                 # Commit with specified date
                 repo.git.commit(m=commit_message, date=commit_date)
                 print(f"Committed {file_to_commit} with message: {commit_message} on {commit_date}")
-            
+                
             except git.exc.GitCommandError as e:
                 print(f"Failed to commit {file_to_commit}: {e}")
                 continue
