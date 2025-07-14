@@ -8,7 +8,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: " Inventory Management",
+  title: "Inventory Management",
   description: "An inventory management system",
 }
 

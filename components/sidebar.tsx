@@ -76,7 +76,11 @@ export function AppSidebar() {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
             <Package className="h-4 w-4 text-white" />
           </div>
+<<<<<<< Updated upstream
           <span className="text-xl font-bold">InveNtory</span>
+=======
+          <span className="text-xl font-bold">Genzura</span>
+>>>>>>> Stashed changes
         </div>
       </SidebarHeader>
 
@@ -99,7 +103,11 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
+<<<<<<< Updated upstream
       {/* <SidebarFooter className="p-4">
+=======
+      <SidebarFooter className="p-4">
+>>>>>>> Stashed changes
         <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200">
           <CardContent className="p-4 text-center">
             <div className="mb-3">
@@ -112,7 +120,11 @@ export function AppSidebar() {
             <Button className="w-full bg-blue-600 hover:bg-blue-700">Upgrade Now</Button>
           </CardContent>
         </Card>
+<<<<<<< Updated upstream
       </SidebarFooter> */}
+=======
+      </SidebarFooter>
+>>>>>>> Stashed changes
     </Sidebar>
   )
 }
