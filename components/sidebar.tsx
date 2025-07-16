@@ -55,7 +55,7 @@ const menuItems = [
     icon: Wallet,
   },
   {
-    title: "Others",
+    title: "System Utils",
     url: "/others",
     icon: MoreHorizontal,
   },
