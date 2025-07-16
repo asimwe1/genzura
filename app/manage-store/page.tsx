@@ -12,21 +12,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 export default function ManageStore() {
   const [storeInfo, setStoreInfo] = useState({
-<<<<<<< Updated upstream
-    name: "InveNtory Electronics Store",
-    description: "Your trusted partner for electronics, furniture, and office supplies",
-    address: "123 Commerce Street, Business District, NY 10001",
-    phone: "+1 (555) 123-4567",
-    email: "info@inventory.com",
-    website: "www.inventory.com",
-=======
     name: "Genzura Inventory",
     description: "Your trusted partner for electronics, furniture, and office supplies",
     address: "123 Commerce Street, Business District, NY 10001",
     phone: "+1 (555) 123-4567",
     email: "info@genzura.com",
     website: "www.genzura.com",
->>>>>>> Stashed changes
     taxId: "12-3456789",
     currency: "USD",
   })
