@@ -1,14 +1,23 @@
 "use client"
 
-import { Bell, Search, Moon, ChevronDown, Plus } from "lucide-react"
+import { Bell, Search, Moon, ChevronDown, Plus, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { useRouter } from "next/navigation"
 
 export default function Dashboard() {
+  const router = useRouter()
+  
+  const handleLogout = () => {
+    localStorage.removeItem("isAuth")
+    // Force reload to ensure AuthGuard picks up the change
+    window.location.href = "/login"
+  }
+
   const upcomingTasks = [
     { title: "Complete Inventory Count", time: "Nov 20, 9:00 AM" },
     { title: "Supplier Meeting", time: "Nov 21, 12:00 PM" },
@@ -51,6 +60,16 @@ export default function Dashboard() {
 
           <Button variant="ghost" size="icon">
             <Moon className="h-5 w-5" />
+          </Button>
+          
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleLogout}
+            className="bg-red-100 hover:bg-red-200 rounded-full p-2 border border-red-300 shadow-md"
+            aria-label="Logout"
+          >
+            <LogOut className="h-7 w-7 text-red-600" />
           </Button>
         </div>
       </div>

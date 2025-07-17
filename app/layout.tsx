@@ -2,8 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import { AppSidebar } from "@/components/sidebar"
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import { AuthGuard } from "@/components/AuthGuard";
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -20,10 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <SidebarProvider>
-          <AppSidebar />
-          <SidebarInset>{children}</SidebarInset>
-        </SidebarProvider>
+        <AuthGuard>{children}</AuthGuard>
       </body>
     </html>
   )
