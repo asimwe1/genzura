@@ -7,11 +7,13 @@ import { Loader2, Package, Mail, Lock, User } from "lucide-react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
+import { Radio } from "@/components/ui/radio"
 
 const SignupSchema = Yup.object().shape({
   name: Yup.string().min(2, "Name must be at least 2 characters").required("Name is required"),
   email: Yup.string().email("Invalid email address").required("Email is required"),
   password: Yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
+  companyType: Yup.string().oneOf(["product", "service"], "Select company type").required("Company type is required"),
 });
 
 export default function SignupPage() {
@@ -27,16 +29,21 @@ export default function SignupPage() {
           <p className="text-gray-500 text-sm">Inventory Management System</p>
         </div>
         <Formik
-          initialValues={{ name: "", email: "", password: "" }}
+          initialValues={{ name: "", email: "", password: "", companyType: "product" }}
           validationSchema={SignupSchema}
           onSubmit={(values, { setSubmitting }) => {
             setSubmitting(true);
             localStorage.setItem("isAuth", "true");
+            localStorage.setItem("companyType", values.companyType);
             setSubmitting(false);
-            router.replace("/");
+            if (values.companyType === "service") {
+              router.replace("/services");
+            } else {
+              router.replace("/");
+            }
           }}
         >
-          {({ isSubmitting, isValid, touched, errors }) => (
+          {({ isSubmitting, isValid, touched, errors, values, setFieldValue }) => (
             <Form className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Name</label>
@@ -81,10 +88,24 @@ export default function SignupPage() {
                 </div>
                 <ErrorMessage name="password" component="div" className="text-xs text-red-500 mt-1" />
               </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Company Type</label>
+                <div className="flex gap-4 items-center">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <Field type="radio" name="companyType" value="product" checked={values.companyType === "product"} onChange={() => setFieldValue("companyType", "product")} />
+                    <span className="text-sm">Product-based</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <Field type="radio" name="companyType" value="service" checked={values.companyType === "service"} onChange={() => setFieldValue("companyType", "service")} />
+                    <span className="text-sm">Service-based</span>
+                  </label>
+                </div>
+                <ErrorMessage name="companyType" component="div" className="text-xs text-red-500 mt-1" />
+              </div>
               <Button
                 type="submit"
                 className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-3 font-semibold"
-                disabled={isSubmitting || !isValid || !touched.name || !touched.email || !touched.password}
+                disabled={isSubmitting || !isValid || !touched.name || !touched.email || !touched.password || !touched.companyType}
               >
                 {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : "Sign Up"}
               </Button>

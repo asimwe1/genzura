@@ -31,8 +31,13 @@ export default function LoginPage() {
           onSubmit={(values, { setSubmitting }) => {
             setSubmitting(true);
             localStorage.setItem("isAuth", "true");
+            const companyType = localStorage.getItem("companyType") || "product";
             setSubmitting(false);
-            router.replace("/");
+            if (companyType === "service") {
+              router.replace("/services");
+            } else {
+              router.replace("/");
+            }
           }}
         >
           {({ isSubmitting, isValid, touched, errors }) => (
