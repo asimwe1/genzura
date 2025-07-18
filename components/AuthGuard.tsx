@@ -63,24 +63,32 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Show login/signup/forgot-password pages if not authenticated
-  if (!isAuth && ["/login", "/signup", "/forgot-password", "/reset-password"].includes(pathname)) {
+  // Public routes
+  const publicRoutes = ["/login", "/signup", "/forgot-password", "/reset-password"];
+  const isPublicRoute = publicRoutes.includes(pathname);
+  const isProductPublic = pathname.startsWith("/product");
+  const isServicePublic = pathname.startsWith("/service");
+
+  // Allow non-authenticated users to access /product/* and /service/*
+  if (!isAuth && (isProductPublic || isServicePublic)) {
     return <>{children}</>;
   }
 
-  // Show dashboard with appropriate sidebar if authenticated
-  if (isAuth) {
+  // Show login/signup/forgot-password pages if not authenticated and on a public route
+  if (checked && !isAuth && isPublicRoute) {
+    return <>{children}</>;
+  }
+
+  // Show dashboard with appropriate sidebar if authenticated and not on a public route
+  if (checked && isAuth && !isPublicRoute) {
     const isProductPortal = pathname.startsWith("/product") || (pathname === "/" && userPortal === "product");
     const isServicePortal = pathname.startsWith("/service") || (pathname === "/" && userPortal === "service");
-    
     let SidebarComponent = AppSidebar; // Default fallback
-    
     if (isProductPortal) {
       SidebarComponent = ProductSidebar;
     } else if (isServicePortal) {
       SidebarComponent = ServiceSidebar;
     }
-
     return (
       <SidebarProvider>
         <SidebarComponent />
@@ -89,7 +97,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Show loading while redirecting
+  // Show loading while redirecting or in any other ambiguous state
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>

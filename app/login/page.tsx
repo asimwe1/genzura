@@ -7,6 +7,8 @@ import { Loader2, Package, Mail, Lock } from "lucide-react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email address").required("Email is required"),
@@ -15,6 +17,7 @@ const LoginSchema = Yup.object().shape({
 
 export default function LoginPage() {
   const router = useRouter();
+  const [portalType, setPortalType] = useState("product");
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-100 px-2">
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 space-y-6">
@@ -31,8 +34,9 @@ export default function LoginPage() {
           onSubmit={(values, { setSubmitting }) => {
             setSubmitting(true);
             localStorage.setItem("isAuth", "true");
+            localStorage.setItem("userPortal", portalType);
             setSubmitting(false);
-            router.replace("/");
+            window.location.href = portalType === "service" ? "/service" : "/product";
           }}
         >
           {({ isSubmitting, isValid, touched, errors }) => (
@@ -65,6 +69,18 @@ export default function LoginPage() {
                   />
                 </div>
                 <ErrorMessage name="password" component="div" className="text-xs text-red-500 mt-1" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Portal</label>
+                <Select value={portalType} onValueChange={setPortalType}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="product">Product Portal</SelectItem>
+                    <SelectItem value="service">Service Portal</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="text-right">
                 <Link href="/forgot-password" className="text-xs text-blue-600 hover:underline">
