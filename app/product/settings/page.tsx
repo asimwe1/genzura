@@ -1,27 +1,27 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { User, Bell, Shield, Database, Palette, Save, Eye, EyeOff } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { toast } from "sonner"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { useState } from "react";
+import { User, Bell, Shield, Database, Palette, Save, Eye, EyeOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
-export default function Settings() {
-  const [showPassword, setShowPassword] = useState(false)
+export default function ProductSettings() {
+  const [showPassword, setShowPassword] = useState(false);
   const [profile, setProfile] = useState({
-    name: "Rio Admin",
-    email: "rio@inventory.com",
-    phone: "+1 (555) 123-4567",
+    name: "Product Admin",
+    email: "product@portal.com",
+    phone: "+1 (555) 111-2222",
     role: "Administrator",
     avatar: "/placeholder.svg?height=80&width=80",
-  })
+  });
 
   const [notifications, setNotifications] = useState({
     emailAlerts: true,
@@ -30,14 +30,14 @@ export default function Settings() {
     lowStockAlerts: true,
     orderAlerts: true,
     systemAlerts: true,
-  })
+  });
 
   const [security, setSecurity] = useState({
     twoFactorAuth: true,
     sessionTimeout: "30",
     passwordExpiry: "90",
     loginAttempts: "5",
-  })
+  });
 
   const [preferences, setPreferences] = useState({
     theme: "light",
@@ -45,62 +45,62 @@ export default function Settings() {
     timezone: "America/New_York",
     dateFormat: "MM/DD/YYYY",
     currency: "USD",
-  })
+  });
 
-  const [showConfirm, setShowConfirm] = useState<{ open: boolean; action: string | null }>({ open: false, action: null })
-  const [showPhotoDialog, setShowPhotoDialog] = useState(false)
-  const [photoFile, setPhotoFile] = useState<File | null>(null)
-  const [showPasswordFields, setShowPasswordFields] = useState(false)
-  const [passwords, setPasswords] = useState({ current: "", new: "" })
+  const [showConfirm, setShowConfirm] = useState<{ open: boolean; action: string | null }>({ open: false, action: null });
+  const [showPhotoDialog, setShowPhotoDialog] = useState(false);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [showPasswordFields, setShowPasswordFields] = useState(false);
+  const [passwords, setPasswords] = useState({ current: "", new: "" });
 
   // Save all changes
   const handleSaveAll = () => {
-    toast.success("All changes saved!")
-  }
+    toast.success("All changes saved!");
+  };
 
   // Change photo
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setPhotoFile(e.target.files[0])
-      toast.success("Photo selected: " + e.target.files[0].name)
-      setShowPhotoDialog(false)
+      setPhotoFile(e.target.files[0]);
+      toast.success("Photo selected: " + e.target.files[0].name);
+      setShowPhotoDialog(false);
     }
-  }
+  };
 
   // Password change
   const handlePasswordChange = () => {
     if (!passwords.current || !passwords.new) {
-      toast.error("Please fill in both password fields.")
-      return
+      toast.error("Please fill in both password fields.");
+      return;
     }
-    setShowConfirm({ open: true, action: "Change Password" })
-  }
+    setShowConfirm({ open: true, action: "Change Password" });
+  };
 
   // Confirm sensitive actions
   const handleConfirm = () => {
     if (showConfirm.action === "Change Password") {
-      toast.success("Password changed successfully!")
-      setPasswords({ current: "", new: "" })
+      toast.success("Password changed successfully!");
+      setPasswords({ current: "", new: "" });
     } else if (showConfirm.action === "Enable 2FA") {
-      toast.success("Two-Factor Authentication enabled!")
+      toast.success("Two-Factor Authentication enabled!");
     } else if (showConfirm.action === "Disable 2FA") {
-      toast.success("Two-Factor Authentication disabled!")
+      toast.success("Two-Factor Authentication disabled!");
     }
-    setShowConfirm({ open: false, action: null })
-  }
+    setShowConfirm({ open: false, action: null });
+  };
 
   // Maintenance actions
   const handleMaintenance = (action: string) => {
-    toast.success(`${action} completed!`)
-  }
+    toast.success(`${action} completed!`);
+  };
 
   return (
     <div className="flex-1 space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Settings</h1>
-          <p className="text-gray-600">Manage your account and system preferences</p>
+          <h1 className="text-3xl font-bold">Product Settings</h1>
+          <p className="text-gray-600">Manage your product portal account and preferences</p>
         </div>
         <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleSaveAll}>
           <Save className="h-4 w-4 mr-2" />
@@ -130,7 +130,7 @@ export default function Settings() {
               <div className="flex items-center space-x-4">
                 <Avatar className="h-20 w-20">
                   <AvatarImage src={profile.avatar || "/placeholder.svg"} />
-                  <AvatarFallback>RA</AvatarFallback>
+                  <AvatarFallback>PA</AvatarFallback>
                 </Avatar>
                 <div>
                   <Button variant="outline" size="sm" onClick={() => setShowPhotoDialog(true)}>
@@ -526,5 +526,5 @@ export default function Settings() {
         </DialogContent>
       </Dialog>
     </div>
-  )
-}
+  );
+} 

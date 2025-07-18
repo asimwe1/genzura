@@ -1,213 +1,263 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Send, Bot, User, Loader2, Sparkles, X, Minimize2 } from "lucide-react"
+import { Bot, Send, X, Loader2, MessageCircle, Paperclip, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { toast } from "sonner"
 
-interface Message {
-  id: string
-  content: string
-  sender: "user" | "ai"
-  timestamp: Date
-  type: "text" | "loading"
+const placeholderResponses = [
+  "Hello! How can I assist you today?",
+  "I'm here to help with your inventory, suppliers, or reports.",
+  "You can ask me about products, services, or system settings.",
+  "For more advanced help, contact support or check the documentation.",
+  "Let me know if you need a quick summary or a detailed report!"
+]
+
+function getRandomResponse() {
+  return placeholderResponses[Math.floor(Math.random() * placeholderResponses.length)]
 }
 
-interface AIChatProps {
-  isOpen: boolean
-  onToggle: () => void
-  onMinimize: () => void
-}
-
-export function AIChat({ isOpen, onToggle, onMinimize }: AIChatProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      content: "Hello! I'm your AI assistant. I can help you with inventory management, supplier queries, reports, and system operations. How can I assist you today?",
-      sender: "ai",
-      timestamp: new Date(),
-      type: "text"
+export function AIChat({ fullPage = false }: { fullPage?: boolean }) {
+  const [open, setOpen] = useState(fullPage)
+  const [minimized, setMinimized] = useState(false)
+  const [messages, setMessages] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("aiChatMessages")
+      if (saved) return JSON.parse(saved)
     }
-  ])
-  const [inputValue, setInputValue] = useState("")
-  const [isTyping, setIsTyping] = useState(false)
-  const scrollAreaRef = useRef<HTMLDivElement>(null)
-
-  const quickActions = [
-    "Show low stock items",
-    "Generate monthly report",
-    "Find supplier contact",
-    "Check inventory status",
-    "Help with settings",
-    "Best Recommendation"
-  ]
+    return [
+      { role: "assistant", content: "Hi! I'm your AI assistant. How can I help you today?" }
+    ]
+  })
+  const [input, setInput] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
+  const chatRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight
+    }
+  }, [messages, open, minimized])
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("aiChatMessages", JSON.stringify(messages))
     }
   }, [messages])
 
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return
+  // Improved context summary: last 3 user and assistant messages
+  const lastMessages = messages.slice(-6)
+  const contextSummary = lastMessages.length > 0
+    ? lastMessages.map((m, i) => `${m.role === "user" ? "User" : "AI"} #${lastMessages.length - i}: ${m.content}`).join("\n")
+    : "No recent context."
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: inputValue,
-      sender: "user",
-      timestamp: new Date(),
-      type: "text"
+  const handleSend = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    if (!input.trim() && uploadedFiles.length === 0) return
+    if (input.trim()) {
+      setMessages((msgs) => [...msgs, { role: "user", content: input }])
     }
-
-    setMessages(prev => [...prev, userMessage])
-    setInputValue("")
-    setIsTyping(true)
-
-    // Simulate placeholder API call
+    if (uploadedFiles.length > 0) {
+      setMessages((msgs) => [
+        ...msgs,
+        ...uploadedFiles.map((file) => ({ role: "user", content: `Uploaded file: ${file.name}` }))
+      ])
+      toast.success(`${uploadedFiles.length} file(s) uploaded!`)
+      setUploadedFiles([])
+    }
+    setInput("")
+    setLoading(true)
     setTimeout(() => {
-      let aiContent = `I understand you're asking about "${inputValue}". This would be processed by our backend AI service to provide you with relevant information about your inventory management system.`
-      if (inputValue.toLowerCase().includes("recommend")) {
-        aiContent = "Best Recommendation: Consider restocking low inventory items and reviewing supplier performance for optimal operations."
-      }
-      const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        content: aiContent,
-        sender: "ai",
-        timestamp: new Date(),
-        type: "text"
-      }
-      setMessages(prev => [...prev, aiResponse])
-      setIsTyping(false)
-    }, 1500)
+      setMessages((msgs) => [
+        ...msgs,
+        { role: "assistant", content: getRandomResponse() }
+      ])
+      setLoading(false)
+    }, 1200)
   }
 
-  const handleQuickAction = (action: string) => {
-    setInputValue(action)
-    setTimeout(() => handleSendMessage(), 100)
-  }
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSendMessage()
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files)
+      setUploadedFiles(files)
+      if (files.length > 0) {
+        toast.success(`${files.length} file(s) selected for upload.`)
+      } else {
+        toast.error("No files selected.")
+      }
     }
   }
 
-  if (!isOpen) {
+  // Floating widget trigger
+  if (!fullPage) {
+    if (minimized) {
+      return (
+        <div className="fixed bottom-6 right-6 z-50">
+          <Button
+            className="rounded-full shadow-lg bg-blue-600 hover:bg-blue-700 h-14 w-14 flex items-center justify-center"
+            onClick={() => { setOpen(true); setMinimized(false) }}
+            aria-label="Open AI Chat Assistant"
+          >
+            <MessageCircle className="h-7 w-7 text-white" />
+          </Button>
+        </div>
+      )
+    }
     return (
-      <Button
-        onClick={onToggle}
-        className="fixed bottom-4 right-4 h-12 w-12 rounded-full bg-blue-600 hover:bg-blue-700 shadow-lg"
-        size="icon"
-      >
-        <Bot className="h-6" />
-      </Button>
+      <>
+        <div className="fixed bottom-6 right-6 z-50">
+          <Button
+            className="rounded-full shadow-lg bg-blue-600 hover:bg-blue-700 h-14 w-14 flex items-center justify-center"
+            onClick={() => setOpen(true)}
+            aria-label="Open AI Chat Assistant"
+          >
+            <MessageCircle className="h-7 w-7 text-white" />
+          </Button>
+        </div>
+        {open && (
+          <div className="fixed bottom-24 right-6 z-50 w-96 max-w-full">
+            <Card className="shadow-2xl border-blue-200">
+              <CardHeader className="flex flex-row items-center justify-between p-4 border-b">
+                <div className="flex items-center gap-2">
+                  <Bot className="h-6 w-6 text-blue-600" />
+                  <CardTitle className="text-lg">AI Chat Assistant</CardTitle>
+                </div>
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="icon" onClick={() => setMinimized(true)} aria-label="Minimize chat">
+                    <span className="text-xl">_</span>
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => setOpen(false)} aria-label="Close chat">
+                    <X className="h-5 w-5" />
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="px-4 py-2 border-b bg-gray-50 dark:bg-gray-900 text-xs text-gray-500 whitespace-pre-line">
+                  <span className="font-semibold">Recent Context:</span>
+                  <br />{contextSummary}
+                </div>
+                <div ref={chatRef} className="h-80 overflow-y-auto px-4 py-2 bg-gray-50 dark:bg-gray-900">
+                  {messages.map((msg, i) => (
+                    <div key={i} className={`mb-3 flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                      <div className={`rounded-lg px-4 py-2 max-w-xs text-sm ${msg.role === "user" ? "bg-blue-600 text-white" : "bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-100"}`}>
+                        {msg.content}
+                      </div>
+                    </div>
+                  ))}
+                  {loading && (
+                    <div className="flex justify-start mb-3">
+                      <div className="rounded-lg px-4 py-2 bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-100 flex items-center">
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        Thinking...
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <form onSubmit={handleSend} className="flex items-center border-t p-2 bg-white dark:bg-gray-950 gap-2">
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="file"
+                      className="hidden"
+                      multiple
+                      onChange={handleFileChange}
+                      aria-label="Upload file"
+                    />
+                    <Paperclip className="h-5 w-5 text-blue-600 hover:text-blue-800" />
+                  </label>
+                  <Input
+                    className="flex-1 rounded-full"
+                    placeholder="Type your message..."
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) handleSend(e) }}
+                    aria-label="Type your message"
+                  />
+                  <Button type="submit" disabled={loading || (!input.trim() && uploadedFiles.length === 0)} className="rounded-full h-10 w-10 p-0">
+                    {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                  </Button>
+                </form>
+                {uploadedFiles.length > 0 && (
+                  <div className="px-4 py-2 text-xs text-gray-500 flex flex-wrap gap-2 border-t bg-gray-50 dark:bg-gray-900">
+                    {uploadedFiles.map((file, i) => (
+                      <span key={i} className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                        <FileText className="h-3 w-3" /> {file.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </>
     )
   }
 
+  // Full-page chat experience
   return (
-    <div className="flex flex-col h-[70vh] sm:h-[60vh] w-full">
-      <div className="flex-1 overflow-y-auto">
-        <Card className="shadow-none border-none h-full">
-          <CardContent className="p-0 flex-col h-full">
-            <ScrollArea className="flex-1 pb-2" ref={scrollAreaRef}>
-              <div className="space-y-4 p-4">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
-                  >
-                    <div className={`flex items-end space-x-2 max-w-[80%] ${message.sender === "user" ? "flex-row-reverse space-x-reverse" : ""}`}>
-                      <Avatar className="h-7 w-7">
-                        <AvatarImage src="/placeholder.svg" />
-                        <AvatarFallback className="text-xs">
-                          {message.sender === "ai" ? <Bot className="h-4 w-4 text-blue-600" /> : <User className="h-4 w-4 text-gray-500" />}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div
-                        className={`rounded-lg px-3 py-2 text-sm break-words ${message.sender === "user" ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-900"}`}
-                        style={{ wordBreak: 'break-word' }}
-                      >
-                        {message.type === "loading" ? (
-                          <div className="flex items-center space-x-1">
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                            <span>AI is thinking...</span>
-                          </div>
-                        ) : (
-                          message.content
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {isTyping && (
-                  <div className="flex justify-start">
-                    <div className="flex items-end space-x-2 max-w-[80%]">
-                      <Avatar className="h-7 w-7">
-                        <AvatarFallback className="text-xs">
-                          <Bot className="h-4 w-4 text-blue-600" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="bg-gray-100 rounded-lg px-3 py-2">
-                        <div className="flex items-center space-x-1">
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                          <span>AI is thinking...</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </ScrollArea>
-          </CardContent>
-        </Card>
-      </div>
-      <div className="p-2 border-t bg-white dark:bg-gray-950">
-        <div className="mb-2">
-          <div className="text-xs text-gray-500 mb-1">Quick Actions:</div>
-          <div className="flex flex-wrap gap-1">
-            {quickActions.map((action, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                size="sm"
-                className="text-xs h-6 px-2"
-                onClick={() => handleQuickAction(action)}
-              >
-                {action}
-              </Button>
-            ))}
-          </div>
+    <div className="flex flex-col h-[calc(100vh-2rem)] max-w-2xl mx-auto my-4 rounded-xl shadow-lg border bg-white dark:bg-gray-900">
+      <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center gap-2">
+          <Bot className="h-7 w-7 text-blue-600" />
+          <span className="font-bold text-lg">AI Chat Assistant</span>
         </div>
-        <form
-          className="flex items-center space-x-2"
-          onSubmit={e => {
-            e.preventDefault();
-            handleSendMessage();
-          }}
-        >
-          <Input
-            value={inputValue}
-            onChange={e => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Type your message..."
-            className="flex-1 text-sm"
-            autoFocus
-          />
-          <Button
-            type="submit"
-            disabled={!inputValue.trim() || isTyping}
-            size="icon"
-            className="h-9 w-9"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        </form>
       </div>
+      <div className="px-6 py-2 border-b bg-gray-50 dark:bg-gray-900 text-xs text-gray-500 whitespace-pre-line">
+        <span className="font-semibold">Recent Context:</span>
+        <br />{contextSummary}
+      </div>
+      <div ref={chatRef} className="flex-1 overflow-y-auto px-6 py-4 bg-gray-50 dark:bg-gray-900">
+        {messages.map((msg, i) => (
+          <div key={i} className={`mb-3 flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+            <div className={`rounded-lg px-4 py-2 max-w-xs text-sm ${msg.role === "user" ? "bg-blue-600 text-white" : "bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-100"}`}>
+              {msg.content}
+            </div>
+          </div>
+        ))}
+        {loading && (
+          <div className="flex justify-start mb-3">
+            <div className="rounded-lg px-4 py-2 bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-100 flex items-center">
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              Thinking...
+            </div>
+          </div>
+        )}
+      </div>
+      <form onSubmit={handleSend} className="flex items-center border-t p-4 bg-white dark:bg-gray-950 gap-2">
+        <label className="flex items-center cursor-pointer">
+          <input
+            type="file"
+            className="hidden"
+            multiple
+            onChange={handleFileChange}
+            aria-label="Upload file"
+          />
+          <Paperclip className="h-5 w-5 text-blue-600 hover:text-blue-800" />
+        </label>
+        <Input
+          className="flex-1 rounded-full"
+          placeholder="Type your message..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) handleSend(e) }}
+          aria-label="Type your message"
+        />
+        <Button type="submit" disabled={loading || (!input.trim() && uploadedFiles.length === 0)} className="rounded-full h-12 w-12 p-0">
+          {loading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Send className="h-6 w-6" />}
+        </Button>
+      </form>
+      {uploadedFiles.length > 0 && (
+        <div className="px-6 py-2 text-xs text-gray-500 flex flex-wrap gap-2 border-t bg-gray-50 dark:bg-gray-900">
+          {uploadedFiles.map((file, i) => (
+            <span key={i} className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+              <FileText className="h-3 w-3" /> {file.name}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   )
 } 

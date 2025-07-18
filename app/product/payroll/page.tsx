@@ -8,11 +8,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { toast } from "sonner"
 
 export default function Payroll() {
   const [searchTerm, setSearchTerm] = useState("")
-
-  const employees = [
+  const [payroll, setPayroll] = useState([
     {
       id: "EMP001",
       name: "John Smith",
@@ -65,7 +67,21 @@ export default function Payroll() {
       status: "Pending",
       payDate: "2024-01-31",
     },
-  ]
+  ])
+  const [showAdd, setShowAdd] = useState(false)
+  const [showProcess, setShowProcess] = useState(false)
+  const [form, setForm] = useState({
+    name: "",
+    position: "",
+    department: "",
+    baseSalary: "",
+    tax: "",
+    bonus: "",
+    deductions: "",
+    netPay: "",
+    status: "Pending",
+    payDate: "2024-01-31"
+  })
 
   const getStatusBadge = (status: string) => {
     return status === "Processed" ? (
@@ -75,16 +91,53 @@ export default function Payroll() {
     )
   }
 
-  const filteredEmployees = employees.filter(
+  const filteredEmployees = payroll.filter(
     (employee) =>
       employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.department.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
-  const totalPayroll = employees.reduce((sum, emp) => sum + emp.netPay, 0)
-  const processedCount = employees.filter((emp) => emp.status === "Processed").length
-  const pendingCount = employees.filter((emp) => emp.status === "Pending").length
+  const totalPayroll = payroll.reduce((sum, emp) => sum + emp.netPay, 0)
+  const processedCount = payroll.filter((emp) => emp.status === "Processed").length
+  const pendingCount = payroll.filter((emp) => emp.status === "Pending").length
+
+  const handleAddEmployee = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!form.name || !form.position || !form.department || !form.baseSalary || !form.tax || !form.bonus || !form.deductions || !form.payDate) {
+      toast.error("Please fill in all fields")
+      return
+    }
+    const netPay = Number(form.baseSalary) + Number(form.bonus) - Number(form.deductions)
+    setPayroll([
+      ...payroll,
+      {
+        id: `EMP${payroll.length + 1}`,
+        name: form.name,
+        position: form.position,
+        department: form.department,
+        baseSalary: Number(form.baseSalary),
+        tax: Number(form.tax),
+        bonus: Number(form.bonus),
+        deductions: Number(form.deductions),
+        netPay,
+        status: form.status,
+        payDate: form.payDate
+      }
+    ])
+    setForm({ name: "", position: "", department: "", baseSalary: "", tax: "", bonus: "", deductions: "", netPay: "", status: "Pending", payDate: "2024-01-31" })
+    setShowAdd(false)
+    toast.success("Employee added to payroll!")
+  }
+
+  const handleProcessPayroll = (e: React.FormEvent) => {
+    e.preventDefault()
+    setShowProcess(false)
+    toast.success("Payroll processed! (placeholder)")
+  }
+
+  const handleEdit = () => toast.info("Edit Employee (placeholder)")
+  const handleDownload = () => toast.success("Payslip downloaded (placeholder)")
 
   return (
     <div className="flex-1 space-y-6 p-6">
@@ -95,14 +148,86 @@ export default function Payroll() {
           <p className="text-gray-600">Manage employee salaries and payroll processing</p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline">
-            <Calculator className="h-4 w-4 mr-2" />
-            Process Payroll
-          </Button>
-          <Button className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Employee
-          </Button>
+          <Dialog open={showProcess} onOpenChange={setShowProcess}>
+            <DialogTrigger asChild>
+              <Button variant="outline">
+                <Calculator className="h-4 w-4 mr-2" />
+                Process Payroll
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Process Payroll</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleProcessPayroll} className="space-y-4">
+                <p className="text-gray-600">This will process payroll for all pending employees. Are you sure?</p>
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button type="button" variant="outline" onClick={() => setShowProcess(false)}>Cancel</Button>
+                  <Button type="submit">Process</Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={showAdd} onOpenChange={setShowAdd}>
+            <DialogTrigger asChild>
+              <Button className="bg-blue-600 hover:bg-blue-700">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Employee
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Add Employee</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleAddEmployee} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Name</Label>
+                    <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Position</Label>
+                    <Input value={form.position} onChange={e => setForm(f => ({ ...f, position: e.target.value }))} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Department</Label>
+                    <Input value={form.department} onChange={e => setForm(f => ({ ...f, department: e.target.value }))} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Base Salary</Label>
+                    <Input type="number" value={form.baseSalary} onChange={e => setForm(f => ({ ...f, baseSalary: e.target.value }))} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Tax</Label>
+                    <Input type="number" value={form.tax} onChange={e => setForm(f => ({ ...f, tax: e.target.value }))} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Bonus</Label>
+                    <Input type="number" value={form.bonus} onChange={e => setForm(f => ({ ...f, bonus: e.target.value }))} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Deductions</Label>
+                    <Input type="number" value={form.deductions} onChange={e => setForm(f => ({ ...f, deductions: e.target.value }))} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Pay Date</Label>
+                    <Input type="date" value={form.payDate} onChange={e => setForm(f => ({ ...f, payDate: e.target.value }))} required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Status</Label>
+                    <select className="w-full rounded border px-2 py-2" value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
+                      <option value="Processed">Processed</option>
+                      <option value="Pending">Pending</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button type="button" variant="outline" onClick={() => setShowAdd(false)}>Cancel</Button>
+                  <Button type="submit">Add</Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -127,7 +252,7 @@ export default function Payroll() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Employees</p>
-                <p className="text-2xl font-bold">{employees.length}</p>
+                <p className="text-2xl font-bold">{payroll.length}</p>
               </div>
               <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
                 <Users className="h-6 w-6 text-blue-600" />
@@ -184,7 +309,7 @@ export default function Payroll() {
                 Filter
               </Button>
             </div>
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleDownload}>
               <Download className="h-4 w-4 mr-2" />
               Export Payroll
             </Button>
@@ -235,15 +360,15 @@ export default function Payroll() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleEdit}>
                           <Eye className="h-4 w-4 mr-2" />
                           View Payslip
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleEdit}>
                           <Edit className="h-4 w-4 mr-2" />
                           Edit Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleDownload}>
                           <Download className="h-4 w-4 mr-2" />
                           Download Payslip
                         </DropdownMenuItem>
@@ -258,4 +383,4 @@ export default function Payroll() {
       </Card>
     </div>
   )
-}
+} 

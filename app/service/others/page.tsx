@@ -25,15 +25,15 @@ export default function Others() {
   const quickActions = [
     {
       title: "Backup Data",
-      description: "Create a complete backup of your inventory data",
+      description: "Create a complete backup of your service data",
       icon: Archive,
       action: "Create Backup",
       variant: "default" as const,
       status: "Ready",
     },
     {
-      title: "Import Products",
-      description: "Import products from CSV or Excel files",
+      title: "Import Services",
+      description: "Import services from CSV or Excel files",
       icon: Upload,
       action: "Import Data",
       variant: "outline" as const,
@@ -41,7 +41,7 @@ export default function Others() {
     },
     {
       title: "Export Reports",
-      description: "Export comprehensive inventory and sales reports",
+      description: "Export comprehensive service and performance reports",
       icon: Download,
       action: "Export All",
       variant: "outline" as const,
@@ -191,8 +191,8 @@ export default function Others() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">System Tools & Utilities</h1>
-          <p className="text-gray-600">Additional tools and maintenance options for your inventory system</p>
+          <h1 className="text-3xl font-bold">Service System Tools & Utilities</h1>
+          <p className="text-gray-600">Additional tools and maintenance options for your service portal</p>
         </div>
       </div>
 
@@ -364,7 +364,7 @@ export default function Others() {
           {showModal.content === "import" && (
             <>
               <DialogHeader>
-                <DialogTitle>Import Products</DialogTitle>
+                <DialogTitle>Import Services</DialogTitle>
               </DialogHeader>
               <Input type="file" accept=".csv,.xlsx" onChange={e => setImportFile(e.target.files?.[0] || null)} />
               <DialogFooter>
@@ -388,4 +388,4 @@ export default function Others() {
       </Dialog>
     </div>
   )
-}
+} 

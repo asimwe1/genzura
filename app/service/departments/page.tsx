@@ -1,67 +1,81 @@
 "use client"
 
 import { useState } from "react"
-import { Search, Plus, Filter, Users, Building2, DollarSign, Package, Eye, Edit, Trash2 } from "lucide-react"
+import { Search, Plus, Filter, Users, Building2, DollarSign, Settings, Eye, Edit, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { toast } from "sonner"
 
-export default function Departments() {
+export default function ServiceDepartments() {
   const [searchTerm, setSearchTerm] = useState("")
-
-  const departments = [
+  const [departments, setDepartments] = useState([
     {
-      id: "DEPT001",
-      name: "Electronics",
-      manager: "John Smith",
-      employees: 12,
-      budget: 150000,
-      spent: 89000,
-      products: 245,
-      revenue: 320000,
-      status: "Active",
-      location: "Floor 1, Section A",
-    },
-    {
-      id: "DEPT002",
-      name: "Furniture",
-      manager: "Sarah Johnson",
-      employees: 8,
+      id: "SERV001",
+      name: "Service Delivery",
+      manager: "Alex Carter",
+      employees: 10,
       budget: 120000,
-      spent: 67000,
-      products: 89,
-      revenue: 180000,
+      spent: 70000,
+      projects: 32,
+      revenue: 210000,
       status: "Active",
-      location: "Floor 2, Section B",
+      location: "Floor 1, Section S",
     },
     {
-      id: "DEPT003",
-      name: "Accessories",
-      manager: "Mike Wilson",
-      employees: 6,
-      budget: 80000,
-      spent: 45000,
-      products: 156,
-      revenue: 95000,
+      id: "SERV002",
+      name: "Support",
+      manager: "Emma Lee",
+      employees: 7,
+      budget: 90000,
+      spent: 48000,
+      projects: 18,
+      revenue: 120000,
       status: "Active",
-      location: "Floor 1, Section C",
+      location: "Floor 2, Section T",
     },
     {
-      id: "DEPT004",
-      name: "Office Supplies",
-      manager: "Emma Davis",
-      employees: 4,
+      id: "SERV003",
+      name: "Training",
+      manager: "David Kim",
+      employees: 5,
       budget: 60000,
-      spent: 23000,
-      products: 78,
-      revenue: 45000,
-      status: "Inactive",
-      location: "Floor 3, Section A",
+      spent: 35000,
+      projects: 12,
+      revenue: 80000,
+      status: "Active",
+      location: "Floor 1, Section U",
     },
-  ]
+    {
+      id: "SERV004",
+      name: "Consulting",
+      manager: "Sophia Brown",
+      employees: 4,
+      budget: 50000,
+      spent: 20000,
+      projects: 8,
+      revenue: 60000,
+      status: "Inactive",
+      location: "Floor 3, Section V",
+    },
+  ])
+  const [showAdd, setShowAdd] = useState(false)
+  const [form, setForm] = useState({
+    name: "",
+    manager: "",
+    employees: "",
+    budget: "",
+    spent: "",
+    projects: "",
+    revenue: "",
+    status: "Active",
+    location: ""
+  })
 
   const getStatusBadge = (status: string) => {
     return status === "Active" ? (
@@ -82,18 +96,103 @@ export default function Departments() {
   const totalBudget = departments.reduce((sum, dept) => sum + dept.budget, 0)
   const totalRevenue = departments.reduce((sum, dept) => sum + dept.revenue, 0)
 
+  const handleAddDepartment = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!form.name || !form.manager || !form.employees || !form.budget || !form.spent || !form.projects || !form.revenue || !form.location) {
+      toast.error("Please fill in all fields")
+      return
+    }
+    setDepartments([
+      ...departments,
+      {
+        id: `SERV${departments.length + 1}`,
+        name: form.name,
+        manager: form.manager,
+        employees: Number(form.employees),
+        budget: Number(form.budget),
+        spent: Number(form.spent),
+        projects: Number(form.projects),
+        revenue: Number(form.revenue),
+        status: form.status,
+        location: form.location
+      }
+    ])
+    setForm({ name: "", manager: "", employees: "", budget: "", spent: "", projects: "", revenue: "", status: "Active", location: "" })
+    setShowAdd(false)
+    toast.success("Department added successfully!")
+  }
+
+  const handleEdit = () => toast.info("Edit Department (placeholder)")
+  const handleDelete = () => toast.success("Department deleted (placeholder)")
+
   return (
     <div className="flex-1 space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Departments Management</h1>
-          <p className="text-gray-600">Organize and manage your store departments</p>
+          <h1 className="text-3xl font-bold">Service Departments Management</h1>
+          <p className="text-gray-600">Organize and manage your service departments</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Department
-        </Button>
+        <Dialog open={showAdd} onOpenChange={setShowAdd}>
+          <DialogTrigger asChild>
+            <Button className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Department
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Add Department</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleAddDepartment} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Name</Label>
+                  <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Manager</Label>
+                  <Input value={form.manager} onChange={e => setForm(f => ({ ...f, manager: e.target.value }))} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Employees</Label>
+                  <Input type="number" value={form.employees} onChange={e => setForm(f => ({ ...f, employees: e.target.value }))} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Budget</Label>
+                  <Input type="number" value={form.budget} onChange={e => setForm(f => ({ ...f, budget: e.target.value }))} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Spent</Label>
+                  <Input type="number" value={form.spent} onChange={e => setForm(f => ({ ...f, spent: e.target.value }))} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Projects</Label>
+                  <Input type="number" value={form.projects} onChange={e => setForm(f => ({ ...f, projects: e.target.value }))} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Revenue</Label>
+                  <Input type="number" value={form.revenue} onChange={e => setForm(f => ({ ...f, revenue: e.target.value }))} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Status</Label>
+                  <select className="w-full rounded border px-2 py-2" value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                  </select>
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Location</Label>
+                  <Input value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))} required />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button type="button" variant="outline" onClick={() => setShowAdd(false)}>Cancel</Button>
+                <Button type="submit">Add</Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Stats Cards */}
@@ -148,7 +247,7 @@ export default function Departments() {
                 <p className="text-2xl font-bold">${totalRevenue.toLocaleString()}</p>
               </div>
               <div className="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                <Package className="h-6 w-6 text-orange-600" />
+                <Settings className="h-6 w-6 text-orange-600" />
               </div>
             </div>
           </CardContent>
@@ -193,7 +292,7 @@ export default function Departments() {
                 <TableHead>Employees</TableHead>
                 <TableHead>Budget</TableHead>
                 <TableHead>Spent</TableHead>
-                <TableHead>Products</TableHead>
+                <TableHead>Projects</TableHead>
                 <TableHead>Revenue</TableHead>
                 <TableHead>Location</TableHead>
                 <TableHead>Status</TableHead>
@@ -209,7 +308,7 @@ export default function Departments() {
                   <TableCell>{dept.employees}</TableCell>
                   <TableCell>${dept.budget.toLocaleString()}</TableCell>
                   <TableCell>${dept.spent.toLocaleString()}</TableCell>
-                  <TableCell>{dept.products}</TableCell>
+                  <TableCell>{dept.projects}</TableCell>
                   <TableCell>${dept.revenue.toLocaleString()}</TableCell>
                   <TableCell>{dept.location}</TableCell>
                   <TableCell>{getStatusBadge(dept.status)}</TableCell>
@@ -221,19 +320,19 @@ export default function Departments() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleEdit}>
                           <Eye className="h-4 w-4 mr-2" />
                           View Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleEdit}>
                           <Edit className="h-4 w-4 mr-2" />
                           Edit Department
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleEdit}>
                           <Users className="h-4 w-4 mr-2" />
                           Manage Staff
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">
+                        <DropdownMenuItem className="text-red-600" onClick={handleDelete}>
                           <Trash2 className="h-4 w-4 mr-2" />
                           Delete
                         </DropdownMenuItem>
@@ -248,4 +347,4 @@ export default function Departments() {
       </Card>
     </div>
   )
-}
+} 

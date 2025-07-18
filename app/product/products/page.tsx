@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 import {
   Search,
   Plus,
@@ -13,16 +13,16 @@ import {
   AlertTriangle,
   XCircle,
   DollarSign,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
-export default function Inventory() {
-  const [searchTerm, setSearchTerm] = useState("")
+export default function ProductPortalProducts() {
+  const [searchTerm, setSearchTerm] = useState("");
 
   const inventoryItems = [
     {
@@ -65,39 +65,39 @@ export default function Inventory() {
       supplier: "SoundTech",
       status: "In Stock",
     },
-  ]
+  ];
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "In Stock":
-        return <Badge className="bg-green-100 text-green-800">In Stock</Badge>
+        return <Badge className="bg-green-100 text-green-800">In Stock</Badge>;
       case "Low Stock":
-        return <Badge className="bg-yellow-100 text-yellow-800">Low Stock</Badge>
+        return <Badge className="bg-yellow-100 text-yellow-800">Low Stock</Badge>;
       case "Out of Stock":
-        return <Badge className="bg-red-100 text-red-800">Out of Stock</Badge>
+        return <Badge className="bg-red-100 text-red-800">Out of Stock</Badge>;
       default:
-        return <Badge>{status}</Badge>
+        return <Badge>{status}</Badge>;
     }
-  }
+  };
 
   const filteredItems = inventoryItems.filter(
     (item) =>
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.id.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+      item.id.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="flex-1 space-y-6 pr-6 pt-3">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Inventory Management</h1>
-          <p className="text-gray-600">Manage your inventory items and stock levels</p>
+          <h1 className="text-3xl font-bold">Product Inventory Management</h1>
+          <p className="text-gray-600">Manage your product inventory and stock levels</p>
         </div>
         <Button className="bg-blue-600 hover:bg-blue-700">
           <Plus className="h-4 w-4 mr-2" />
-          Add Item
+          Add Product
         </Button>
       </div>
 
@@ -107,7 +107,7 @@ export default function Inventory() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Items</p>
+                <p className="text-sm font-medium text-gray-600">Total Products</p>
                 <p className="text-2xl font-bold">1,234</p>
               </div>
               <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -168,7 +168,7 @@ export default function Inventory() {
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
-                  placeholder="Search inventory..."
+                  placeholder="Search products..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -187,16 +187,16 @@ export default function Inventory() {
         </CardContent>
       </Card>
 
-      {/* Inventory Table */}
+      {/* Products Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Inventory Items</CardTitle>
+          <CardTitle>Products</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Item ID</TableHead>
+                <TableHead>Product ID</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Quantity</TableHead>
@@ -248,5 +248,5 @@ export default function Inventory() {
         </CardContent>
       </Card>
     </div>
-  )
-}
+  );
+} 

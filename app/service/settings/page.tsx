@@ -1,3 +1,4 @@
+// Copy of main settings page for service portal
 "use client"
 
 import { useState } from "react"
@@ -16,9 +17,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 export default function Settings() {
   const [showPassword, setShowPassword] = useState(false)
   const [profile, setProfile] = useState({
-    name: "Rio Admin",
-    email: "rio@inventory.com",
-    phone: "+1 (555) 123-4567",
+    name: "Service Admin",
+    email: "service@portal.com",
+    phone: "+1 (555) 987-6543",
     role: "Administrator",
     avatar: "/placeholder.svg?height=80&width=80",
   })
@@ -99,8 +100,8 @@ export default function Settings() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Settings</h1>
-          <p className="text-gray-600">Manage your account and system preferences</p>
+          <h1 className="text-3xl font-bold">Service Settings</h1>
+          <p className="text-gray-600">Manage your service portal account and preferences</p>
         </div>
         <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleSaveAll}>
           <Save className="h-4 w-4 mr-2" />
@@ -130,7 +131,7 @@ export default function Settings() {
               <div className="flex items-center space-x-4">
                 <Avatar className="h-20 w-20">
                   <AvatarImage src={profile.avatar || "/placeholder.svg"} />
-                  <AvatarFallback>RA</AvatarFallback>
+                  <AvatarFallback>SA</AvatarFallback>
                 </Avatar>
                 <div>
                   <Button variant="outline" size="sm" onClick={() => setShowPhotoDialog(true)}>
@@ -527,4 +528,4 @@ export default function Settings() {
       </Dialog>
     </div>
   )
-}
+} 

@@ -1,96 +1,139 @@
-"use client";
+"use client"
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { Loader2, Package, Mail } from "lucide-react";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-
-const ForgotSchema = Yup.object().shape({
-  email: Yup.string().email("Invalid email address").required("Email is required"),
-});
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
+import { Moon, Sun, Monitor, Package, Mail, ArrowLeft } from "lucide-react"
+import { useTheme } from "next-themes"
+import Link from "next/link"
+import { toast } from "sonner"
 
 export default function ForgotPasswordPage() {
-  const [sent, setSent] = useState(false);
-  const router = useRouter();
+  const [email, setEmail] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSubmitted, setIsSubmitted] = useState(false)
+  const router = useRouter()
+  const { theme, setTheme } = useTheme()
 
-  // Auto redirect to login after success
-  useEffect(() => {
-    if (sent) {
-      const timer = setTimeout(() => {
-        router.replace("/login");
-      }, 3000);
-      return () => clearTimeout(timer);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!email) {
+      toast.error("Please enter your email address")
+      return
     }
-  }, [sent, router]);
+    
+    setIsLoading(true)
+    
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false)
+      setIsSubmitted(true)
+      toast.success("Password reset link sent to your email!")
+    }, 2000)
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-100 px-2">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 space-y-6">
-        <div className="flex flex-col items-center mb-4">
-          <div className="h-14 w-14 sm:h-12 sm:w-12 rounded-lg bg-blue-600 flex items-center justify-center mb-2">
-            <Package className="h-8 w-8 sm:h-7 sm:w-7 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-blue-700">Forgot Password</h1>
-          <p className="text-gray-500 text-sm text-center">Enter your email and we&apos;ll send you a link to reset your password.</p>
-        </div>
-        {sent ? (
-          <div className="text-center text-green-600 font-semibold py-8">
-            If an account exists for that email, a reset link has been sent.
-            <div className="mt-4 text-sm text-gray-500">
-              Redirecting to login in 3 seconds...
-            </div>
-            <div className="mt-4">
-              <Link href="/login" className="text-blue-600 hover:underline font-medium">Back to Login</Link>
-            </div>
-          </div>
-        ) : (
-          <Formik
-            initialValues={{ email: "" }}
-            validationSchema={ForgotSchema}
-            onSubmit={(values, { setSubmitting }) => {
-              setSubmitting(true);
-              setTimeout(() => {
-                setSent(true);
-                setSubmitting(false);
-              }, 1200);
-            }}
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
+      {/* Theme Toggler */}
+      <div className="absolute top-4 right-4">
+        <div className="flex items-center space-x-2 bg-white dark:bg-gray-800 rounded-lg p-2 shadow-lg">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setTheme("light")}
+            className={theme === "light" ? "bg-blue-100 text-blue-600" : ""}
           >
-            {({ isSubmitting, isValid, touched }) => (
-              <Form className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Email</label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <Field
-                      as={Input}
-                      type="email"
-                      name="email"
-                      placeholder="you@email.com"
-                      className="pl-10"
-                      autoFocus
-                    />
-                  </div>
-                  <ErrorMessage name="email" component="div" className="text-xs text-red-500 mt-1" />
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-3 font-semibold"
-                  disabled={isSubmitting || !isValid || !touched.email}
-                >
-                  {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : "Send Reset Link"}
-                </Button>
-                <div className="text-center text-sm text-gray-600">
-                  <Link href="/login" className="text-blue-600 hover:underline font-medium">Back to Login</Link>
-                </div>
-              </Form>
-            )}
-          </Formik>
-        )}
+            <Sun className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setTheme("system")}
+            className={theme === "system" ? "bg-blue-100 text-blue-600" : ""}
+          >
+            <Monitor className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setTheme("dark")}
+            className={theme === "dark" ? "bg-blue-100 text-blue-600" : ""}
+          >
+            <Moon className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
+
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <div className="flex items-center justify-center mb-6">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Package className="h-8 w-8 text-white" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl text-center">Forgot Password?</CardTitle>
+          <CardDescription className="text-center">
+            Enter your email address and we'll send you a link to reset your password
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {!isSubmitted ? (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Enter your email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full pl-10"
+                  />
+                </div>
+              </div>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? "Sending..." : "Send Reset Link"}
+              </Button>
+            </form>
+          ) : (
+            <div className="space-y-4 text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                <Mail className="h-8 w-8 text-green-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-green-600">Check Your Email</h3>
+                <p className="text-sm text-gray-600 mt-2">
+                  We've sent a password reset link to <strong>{email}</strong>
+                </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  If you don't see the email, check your spam folder
+                </p>
+              </div>
+            </div>
+          )}
+          
+          <div className="mt-6 text-center">
+            <Link 
+              href="/login" 
+              className="inline-flex items-center text-sm text-blue-600 hover:text-blue-500 font-medium"
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Back to Sign In
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
     </div>
-  );
+  )
 } 

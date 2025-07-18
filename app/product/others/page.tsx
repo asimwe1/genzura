@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Archive,
@@ -12,20 +12,20 @@ import {
   Trash2,
   RefreshCw,
   Copy,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { useState } from "react"
-import { toast } from "sonner"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 export default function Others() {
   const quickActions = [
     {
       title: "Backup Data",
-      description: "Create a complete backup of your inventory data",
+      description: "Create a complete backup of your product inventory data",
       icon: Archive,
       action: "Create Backup",
       variant: "default" as const,
@@ -41,7 +41,7 @@ export default function Others() {
     },
     {
       title: "Export Reports",
-      description: "Export comprehensive inventory and sales reports",
+      description: "Export comprehensive product and sales reports",
       icon: Download,
       action: "Export All",
       variant: "outline" as const,
@@ -55,7 +55,7 @@ export default function Others() {
       variant: "outline" as const,
       status: "12 New",
     },
-  ]
+  ];
 
   const systemTools = [
     {
@@ -86,7 +86,7 @@ export default function Others() {
       status: "Pending",
       lastRun: "1 week ago",
     },
-  ]
+  ];
 
   const maintenanceTools = [
     {
@@ -110,89 +110,89 @@ export default function Others() {
       action: "Reset",
       danger: true,
     },
-  ]
+  ];
 
-  const [showConfirm, setShowConfirm] = useState<{ open: boolean; action: string | null }>({ open: false, action: null })
-  const [showModal, setShowModal] = useState<{ open: boolean; content: string | null }>({ open: false, content: null })
-  const [importFile, setImportFile] = useState<File | null>(null)
+  const [showConfirm, setShowConfirm] = useState<{ open: boolean; action: string | null }>({ open: false, action: null });
+  const [showModal, setShowModal] = useState<{ open: boolean; content: string | null }>({ open: false, content: null });
+  const [importFile, setImportFile] = useState<File | null>(null);
 
   // Helper for copy
   const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text)
-    toast.success("Copied to clipboard!")
-  }
+    navigator.clipboard.writeText(text);
+    toast.success("Copied to clipboard!");
+  };
 
   // Quick Actions handlers
   const handleQuickAction = (action: string) => {
     switch (action) {
       case "Create Backup":
-        toast.success("Backup created successfully!")
-        break
+        toast.success("Backup created successfully!");
+        break;
       case "Import Data":
-        setShowModal({ open: true, content: "import" })
-        break
+        setShowModal({ open: true, content: "import" });
+        break;
       case "Export All":
-        toast.success("Reports exported!")
-        break
+        toast.success("Reports exported!");
+        break;
       case "View Logs":
-        setShowModal({ open: true, content: "logs" })
-        break
+        setShowModal({ open: true, content: "logs" });
+        break;
       default:
-        toast("Action not implemented")
+        toast("Action not implemented");
     }
-  }
+  };
 
   // System Management handlers
   const handleSystemTool = (tool: string) => {
     if (tool === "Data Cleanup") {
-      setShowConfirm({ open: true, action: "Data Cleanup" })
+      setShowConfirm({ open: true, action: "Data Cleanup" });
     } else {
-      toast.info(`${tool} configuration opened (placeholder)`)
+      toast.info(`${tool} configuration opened (placeholder)`);
     }
-  }
+  };
 
   // Maintenance handlers
   const handleMaintenance = (tool: string) => {
     if (tool === "Reset Settings") {
-      setShowConfirm({ open: true, action: "Reset Settings" })
+      setShowConfirm({ open: true, action: "Reset Settings" });
     } else {
-      toast.success(`${tool} completed!`)
+      toast.success(`${tool} completed!`);
     }
-  }
+  };
 
   // Confirm destructive actions
   const handleConfirm = () => {
     if (showConfirm.action === "Reset Settings") {
-      toast.success("Settings reset to default!")
+      toast.success("Settings reset to default!");
     } else if (showConfirm.action === "Data Cleanup") {
-      toast.success("Data cleanup completed!")
+      toast.success("Data cleanup completed!");
     }
-    setShowConfirm({ open: false, action: null })
-  }
+    setShowConfirm({ open: false, action: null });
+  };
 
   // Modal close
   const handleCloseModal = () => {
-    setShowModal({ open: false, content: null })
-    setImportFile(null)
-  }
+    setShowModal({ open: false, content: null });
+    setImportFile(null);
+  };
 
   // Import file handler
   const handleImport = () => {
     if (importFile) {
-      toast.success(`Imported: ${importFile.name}`)
-      handleCloseModal()
+      toast.success(`Imported: ${importFile.name}`);
+      handleCloseModal();
     } else {
-      toast.error("No file selected")
+      toast.error("No file selected");
     }
-  }
+  };
 
   return (
     <div className="flex-1 space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">System Tools & Utilities</h1>
-          <p className="text-gray-600">Additional tools and maintenance options for your inventory system</p>
+          <h1 className="text-3xl font-bold">Product System Tools & Utilities</h1>
+          <p className="text-gray-600">Additional tools and maintenance options for your product portal</p>
         </div>
       </div>
 
@@ -387,5 +387,5 @@ export default function Others() {
         </DialogContent>
       </Dialog>
     </div>
-  )
-}
+  );
+} 

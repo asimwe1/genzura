@@ -7,9 +7,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts"
 
-export default function Reports() {
+export default function ProductReports() {
   const [selectedPeriod, setSelectedPeriod] = useState("monthly")
+
+  const revenueTrendData = [
+    { date: "Jan", revenue: 12000 },
+    { date: "Feb", revenue: 14500 },
+    { date: "Mar", revenue: 16000 },
+    { date: "Apr", revenue: 15500 },
+    { date: "May", revenue: 18000 },
+    { date: "Jun", revenue: 20000 },
+    { date: "Jul", revenue: 22000 },
+  ]
+
+  const categoryPerformanceData = [
+    { category: "Electronics", sales: 45678 },
+    { category: "Furniture", sales: 23456 },
+    { category: "Accessories", sales: 12345 },
+  ]
 
   const reportData = [
     {
@@ -162,11 +179,19 @@ export default function Reports() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Sales Trend</CardTitle>
+            <CardTitle>Revenue Trend</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
-              <p className="text-gray-500">Sales trend ctt would go here</p>
+            <div className="h-64 bg-gray-50 rounded-lg">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={revenueTrendData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
@@ -176,8 +201,16 @@ export default function Reports() {
             <CardTitle>Category Performance</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
-              <p className="text-gray-500">Category performance chart would go here</p>
+            <div className="h-64 bg-gray-50 rounded-lg">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={categoryPerformanceData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="category" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="sales" fill="#10b981" />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
@@ -231,4 +264,4 @@ export default function Reports() {
       </Card>
     </div>
   )
-}
+} 

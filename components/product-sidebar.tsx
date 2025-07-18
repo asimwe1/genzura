@@ -1,6 +1,6 @@
 "use client"
 
-import { Building2, FileText, Home, Package, Settings, Truck, Users, Wallet, MoreHorizontal, Crown, Bot } from "lucide-react"
+import { Building2, FileText, Home, Package, Settings, Truck, Users, Wallet, MoreHorizontal, Bot } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import React, { useState } from "react"
@@ -23,57 +23,57 @@ import { AIChat } from "@/components/ai-chat"
 const menuItems = [
   {
     title: "Dashboard",
-    url: "/",
+    url: "/product",
     icon: Home,
   },
   {
-    title: "products",
-    url: "/products",
+    title: "Products",
+    url: "/product/products",
     icon: Package,
   },
   {
-    title: "Reports",
-    url: "/reports",
-    icon: FileText,
-  },
-  {
     title: "Suppliers",
-    url: "/suppliers",
+    url: "/product/suppliers",
     icon: Truck,
   },
   {
+    title: "Reports",
+    url: "/product/reports",
+    icon: FileText,
+  },
+  {
     title: "Manage Store",
-    url: "/manage-store",
+    url: "/product/manage-store",
     icon: Building2,
   },
   {
     title: "Departments",
-    url: "/departments",
+    url: "/product/departments",
     icon: Users,
   },
   {
     title: "Payroll",
-    url: "/payroll",
+    url: "/product/payroll",
     icon: Wallet,
   },
   {
     title: "System Utils",
-    url: "/others",
+    url: "/product/others",
     icon: MoreHorizontal,
   },
   {
     title: "Settings",
-    url: "/settings",
+    url: "/product/settings",
     icon: Settings,
   },
   {
     title: "AI Chat",
-    url: "/ai-chat",
+    url: "/product/ai-chat",
     icon: Bot,
   },
 ]
 
-export function AppSidebar() {
+export function ProductSidebar() {
   const pathname = usePathname()
   const [aiChatOpen, setAIChatOpen] = useState(false)
   const [aiChatMinimized, setAIChatMinimized] = useState(false)
@@ -92,7 +92,7 @@ export function AppSidebar() {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
             <Package className="h-4 w-4 text-white" />
           </div>
-          <span className="text-xl font-bold">Genzura</span>
+          <span className="text-xl font-bold">Product Portal</span>
         </div>
       </SidebarHeader>
 
@@ -123,7 +123,7 @@ export function AppSidebar() {
             </div>
               <h3 className="font-semibold text-sm mb-1">AI Chat Assistant</h3>
             <p className="text-xs text-gray-600 mb-3">
-                Get instant help with inventory, suppliers, reports, and system operations using our AI-powered chat assistant.
+                Get instant help with products, suppliers, inventory, and system operations using our AI-powered chat assistant.
             </p>
               <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => setAIChatOpen(true)}>
                 Open AI Chat
@@ -134,4 +134,4 @@ export function AppSidebar() {
     </Sidebar>
     </>
   )
-}
+} 

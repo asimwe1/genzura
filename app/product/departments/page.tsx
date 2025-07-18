@@ -8,11 +8,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { toast } from "sonner"
 
 export default function Departments() {
   const [searchTerm, setSearchTerm] = useState("")
-
-  const departments = [
+  const [departments, setDepartments] = useState([
     {
       id: "DEPT001",
       name: "Electronics",
@@ -61,7 +63,19 @@ export default function Departments() {
       status: "Inactive",
       location: "Floor 3, Section A",
     },
-  ]
+  ])
+  const [showAdd, setShowAdd] = useState(false)
+  const [form, setForm] = useState({
+    name: "",
+    manager: "",
+    employees: "",
+    budget: "",
+    spent: "",
+    products: "",
+    revenue: "",
+    status: "Active",
+    location: ""
+  })
 
   const getStatusBadge = (status: string) => {
     return status === "Active" ? (
@@ -82,6 +96,35 @@ export default function Departments() {
   const totalBudget = departments.reduce((sum, dept) => sum + dept.budget, 0)
   const totalRevenue = departments.reduce((sum, dept) => sum + dept.revenue, 0)
 
+  const handleAddDepartment = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!form.name || !form.manager || !form.employees || !form.budget || !form.spent || !form.products || !form.revenue || !form.location) {
+      toast.error("Please fill in all fields")
+      return
+    }
+    setDepartments([
+      ...departments,
+      {
+        id: `DEPT${departments.length + 1}`,
+        name: form.name,
+        manager: form.manager,
+        employees: Number(form.employees),
+        budget: Number(form.budget),
+        spent: Number(form.spent),
+        products: Number(form.products),
+        revenue: Number(form.revenue),
+        status: form.status,
+        location: form.location
+      }
+    ])
+    setForm({ name: "", manager: "", employees: "", budget: "", spent: "", products: "", revenue: "", status: "Active", location: "" })
+    setShowAdd(false)
+    toast.success("Department added successfully!")
+  }
+
+  const handleEdit = () => toast.info("Edit Department (placeholder)")
+  const handleDelete = () => toast.success("Department deleted (placeholder)")
+
   return (
     <div className="flex-1 space-y-6 p-6">
       {/* Header */}
@@ -90,10 +133,66 @@ export default function Departments() {
           <h1 className="text-3xl font-bold">Departments Management</h1>
           <p className="text-gray-600">Organize and manage your store departments</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Department
-        </Button>
+        <Dialog open={showAdd} onOpenChange={setShowAdd}>
+          <DialogTrigger asChild>
+            <Button className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Department
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Add Department</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleAddDepartment} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Name</Label>
+                  <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Manager</Label>
+                  <Input value={form.manager} onChange={e => setForm(f => ({ ...f, manager: e.target.value }))} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Employees</Label>
+                  <Input type="number" value={form.employees} onChange={e => setForm(f => ({ ...f, employees: e.target.value }))} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Budget</Label>
+                  <Input type="number" value={form.budget} onChange={e => setForm(f => ({ ...f, budget: e.target.value }))} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Spent</Label>
+                  <Input type="number" value={form.spent} onChange={e => setForm(f => ({ ...f, spent: e.target.value }))} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Products</Label>
+                  <Input type="number" value={form.products} onChange={e => setForm(f => ({ ...f, products: e.target.value }))} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Revenue</Label>
+                  <Input type="number" value={form.revenue} onChange={e => setForm(f => ({ ...f, revenue: e.target.value }))} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Status</Label>
+                  <select className="w-full rounded border px-2 py-2" value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                  </select>
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Location</Label>
+                  <Input value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))} required />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button type="button" variant="outline" onClick={() => setShowAdd(false)}>Cancel</Button>
+                <Button type="submit">Add</Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Stats Cards */}
@@ -221,19 +320,19 @@ export default function Departments() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleEdit}>
                           <Eye className="h-4 w-4 mr-2" />
                           View Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleEdit}>
                           <Edit className="h-4 w-4 mr-2" />
                           Edit Department
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleEdit}>
                           <Users className="h-4 w-4 mr-2" />
                           Manage Staff
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">
+                        <DropdownMenuItem className="text-red-600" onClick={handleDelete}>
                           <Trash2 className="h-4 w-4 mr-2" />
                           Delete
                         </DropdownMenuItem>
@@ -248,4 +347,4 @@ export default function Departments() {
       </Card>
     </div>
   )
-}
+} 

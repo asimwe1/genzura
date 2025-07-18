@@ -1,6 +1,6 @@
 "use client"
 
-import { Building2, FileText, Home, Package, Settings, Truck, Users, Wallet, MoreHorizontal, Crown, Bot } from "lucide-react"
+import { Building2, FileText, Home, Settings, Users, Wallet, MoreHorizontal, Bot } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import React, { useState } from "react"
@@ -23,57 +23,47 @@ import { AIChat } from "@/components/ai-chat"
 const menuItems = [
   {
     title: "Dashboard",
-    url: "/",
+    url: "/service",
     icon: Home,
   },
   {
-    title: "products",
-    url: "/products",
-    icon: Package,
+    title: "Services",
+    url: "/service/services",
+    icon: Settings,
   },
   {
     title: "Reports",
-    url: "/reports",
+    url: "/service/reports",
     icon: FileText,
   },
   {
-    title: "Suppliers",
-    url: "/suppliers",
-    icon: Truck,
-  },
-  {
-    title: "Manage Store",
-    url: "/manage-store",
-    icon: Building2,
-  },
-  {
     title: "Departments",
-    url: "/departments",
+    url: "/service/departments",
     icon: Users,
   },
   {
     title: "Payroll",
-    url: "/payroll",
+    url: "/service/payroll",
     icon: Wallet,
   },
   {
     title: "System Utils",
-    url: "/others",
+    url: "/service/others",
     icon: MoreHorizontal,
   },
   {
     title: "Settings",
-    url: "/settings",
+    url: "/service/settings",
     icon: Settings,
   },
   {
     title: "AI Chat",
-    url: "/ai-chat",
+    url: "/service/ai-chat",
     icon: Bot,
   },
 ]
 
-export function AppSidebar() {
+export function ServiceSidebar() {
   const pathname = usePathname()
   const [aiChatOpen, setAIChatOpen] = useState(false)
   const [aiChatMinimized, setAIChatMinimized] = useState(false)
@@ -89,10 +79,10 @@ export function AppSidebar() {
     <Sidebar className="border-r w-[200px]">
       <SidebarHeader className="p-3">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
-            <Package className="h-4 w-4 text-white" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-600">
+            <Settings className="h-4 w-4 text-white" />
           </div>
-          <span className="text-xl font-bold">Genzura</span>
+          <span className="text-xl font-bold">Service Portal</span>
         </div>
       </SidebarHeader>
 
@@ -116,16 +106,16 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-4">
-        <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200">
+        <Card className="bg-gradient-to-br from-green-50 to-teal-50 border-green-200">
           <CardContent className="p-4 text-center">
             <div className="mb-3">
-                <Bot className="h-8 w-8 mx-auto text-blue-600" />
+                <Bot className="h-8 w-8 mx-auto text-green-600" />
             </div>
               <h3 className="font-semibold text-sm mb-1">AI Chat Assistant</h3>
             <p className="text-xs text-gray-600 mb-3">
-                Get instant help with inventory, suppliers, reports, and system operations using our AI-powered chat assistant.
+                Get instant help with services, operations, reports, and system management using our AI-powered chat assistant.
             </p>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => setAIChatOpen(true)}>
+              <Button className="w-full bg-green-600 hover:bg-green-700" onClick={() => setAIChatOpen(true)}>
                 Open AI Chat
               </Button>
           </CardContent>
@@ -134,4 +124,4 @@ export function AppSidebar() {
     </Sidebar>
     </>
   )
-}
+} 
