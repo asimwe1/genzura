@@ -1,6 +1,6 @@
 "use client"
 
-import { Building2, FileText, Home, Settings, Users, Wallet, MoreHorizontal, Bot } from "lucide-react"
+import { Building2, FileText, Home, Settings, Users, Wallet, MoreHorizontal, Bot, Crown } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import React, { useState } from "react"
@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { AIChat } from "@/components/ai-chat"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 
 const menuItems = [
   {
@@ -65,14 +65,7 @@ const menuItems = [
 
 export function ServiceSidebar() {
   const pathname = usePathname()
-  const [aiChatOpen, setAIChatOpen] = useState(false)
-  const [aiChatMinimized, setAIChatMinimized] = useState(false)
-
-  const handleAIChatClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-    e.preventDefault()
-    setAIChatOpen(true)
-    setAIChatMinimized(false)
-  }
+  const [showUpgrade, setShowUpgrade] = useState(false)
 
   return (
     <>
@@ -106,22 +99,52 @@ export function ServiceSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-4">
-        <Card className="bg-gradient-to-br from-green-50 to-teal-50 border-green-200">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-300">
           <CardContent className="p-4 text-center">
             <div className="mb-3">
-                <Bot className="h-8 w-8 mx-auto text-green-600" />
+                <Crown className="h-8 w-8 mx-auto text-blue-500" />
             </div>
-              <h3 className="font-semibold text-sm mb-1">AI Chat Assistant</h3>
-            <p className="text-xs text-gray-600 mb-3">
-                Get instant help with services, operations, reports, and system management using our AI-powered chat assistant.
+              <h3 className="font-semibold text-sm mb-1 text-blue-800">Upgrade to Premium with AI analysis</h3>
+            <p className="text-xs text-blue-700 mb-3">
+                Unlock advanced analytics, AI-powered insights, and premium support for your service operations.
             </p>
-              <Button className="w-full bg-green-600 hover:bg-green-700" onClick={() => setAIChatOpen(true)}>
-                Open AI Chat
+              <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white" onClick={() => setShowUpgrade(true)}>
+                Upgrade Now
               </Button>
           </CardContent>
         </Card>
       </SidebarFooter>
     </Sidebar>
+    <Dialog open={showUpgrade} onOpenChange={setShowUpgrade}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-blue-700">
+            <Crown className="h-6 w-6 text-blue-500" />
+            Upgrade to Genzura Premium
+          </DialogTitle>
+        </DialogHeader>
+        <div className="py-2 text-center">
+          <p className="text-base font-semibold mb-2">Supercharge your business with AI!</p>
+          <ul className="text-sm text-gray-700 mb-4 space-y-1 text-left mx-auto max-w-xs">
+            <li>• AI-powered analytics and reporting</li>
+            <li>• Smart service and client insights</li>
+            <li>• Priority customer support</li>
+            <li>• Early access to new features</li>
+            <li>• Custom integrations</li>
+            <li>• And much more...</li>
+          </ul>
+          <p className="text-xs text-gray-500">Contact our sales team to discuss your needs and get a personalized offer.</p>
+        </div>
+        <DialogFooter className="flex flex-col gap-2">
+          <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white" onClick={() => { setShowUpgrade(false); window.location.href = 'mailto:sales@genzura.com?subject=Upgrade%20to%20Premium'; }}>
+            Contact Sales
+          </Button>
+          <Button variant="outline" className="w-full" onClick={() => setShowUpgrade(false)}>
+            Maybe Later
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
     </>
   )
 } 
