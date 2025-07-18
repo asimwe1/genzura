@@ -94,19 +94,19 @@ export function AIChat({ fullPage = false }: { fullPage?: boolean }) {
   // Floating widget trigger
   if (!fullPage) {
     if (minimized) {
-      return (
+    return (
         <div className="fixed bottom-6 right-6 z-50">
-          <Button
+      <Button
             className="rounded-full shadow-lg bg-blue-600 hover:bg-blue-700 h-14 w-14 flex items-center justify-center"
             onClick={() => { setOpen(true); setMinimized(false) }}
             aria-label="Open AI Chat Assistant"
           >
             <MessageCircle className="h-7 w-7 text-white" />
-          </Button>
+      </Button>
         </div>
-      )
-    }
-    return (
+    )
+  }
+  return (
       <>
         <div className="fixed bottom-6 right-6 z-50">
           <Button
@@ -138,15 +138,15 @@ export function AIChat({ fullPage = false }: { fullPage?: boolean }) {
                 <div className="px-4 py-2 border-b bg-gray-50 dark:bg-gray-900 text-xs text-gray-500 whitespace-pre-line">
                   <span className="font-semibold">Recent Context:</span>
                   <br />{contextSummary}
-                </div>
+                          </div>
                 <div ref={chatRef} className="h-80 overflow-y-auto px-4 py-2 bg-gray-50 dark:bg-gray-900">
                   {messages.map((msg, i) => (
                     <div key={i} className={`mb-3 flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                       <div className={`rounded-lg px-4 py-2 max-w-xs text-sm ${msg.role === "user" ? "bg-blue-600 text-white" : "bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-100"}`}>
                         {msg.content}
-                      </div>
                     </div>
-                  ))}
+                  </div>
+                ))}
                   {loading && (
                     <div className="flex justify-start mb-3">
                       <div className="rounded-lg px-4 py-2 bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-gray-100 flex items-center">
@@ -188,8 +188,8 @@ export function AIChat({ fullPage = false }: { fullPage?: boolean }) {
                     ))}
                   </div>
                 )}
-              </CardContent>
-            </Card>
+          </CardContent>
+        </Card>
           </div>
         )}
       </>
@@ -225,7 +225,7 @@ export function AIChat({ fullPage = false }: { fullPage?: boolean }) {
             </div>
           </div>
         )}
-      </div>
+        </div>
       <form onSubmit={handleSend} className="flex items-center border-t p-4 bg-white dark:bg-gray-950 gap-2">
         <label className="flex items-center cursor-pointer">
           <input
@@ -247,8 +247,8 @@ export function AIChat({ fullPage = false }: { fullPage?: boolean }) {
         />
         <Button type="submit" disabled={loading || (!input.trim() && uploadedFiles.length === 0)} className="rounded-full h-12 w-12 p-0">
           {loading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Send className="h-6 w-6" />}
-        </Button>
-      </form>
+          </Button>
+        </form>
       {uploadedFiles.length > 0 && (
         <div className="px-6 py-2 text-xs text-gray-500 flex flex-wrap gap-2 border-t bg-gray-50 dark:bg-gray-900">
           {uploadedFiles.map((file, i) => (
@@ -256,7 +256,7 @@ export function AIChat({ fullPage = false }: { fullPage?: boolean }) {
               <FileText className="h-3 w-3" /> {file.name}
             </span>
           ))}
-        </div>
+      </div>
       )}
     </div>
   )
