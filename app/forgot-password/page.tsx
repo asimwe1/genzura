@@ -68,25 +68,25 @@ export default function ForgotPasswordPage() {
         </div>
       </div>
 
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <div className="flex items-center justify-center mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Package className="h-8 w-8 text-white" />
+      <Card className="w-full max-w-lg p-8 shadow-2xl">
+        <CardHeader className="space-y-2 pb-2">
+          <div className="flex flex-col items-center justify-center mb-6">
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg mb-3">
+              <Package className="h-10 w-10 text-white" />
             </div>
+            <CardTitle className="text-3xl text-center mb-2">Forgot Password?</CardTitle>
           </div>
-          <CardTitle className="text-2xl text-center">Forgot Password?</CardTitle>
-          <CardDescription className="text-center">
+          <CardDescription className="text-center text-base mb-2">
             Enter your email address and we'll send you a link to reset your password
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-2 pb-6 px-2">
           {!isSubmitted ? (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-3">
+                <Label htmlFor="email" className="text-base">Email Address</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                   <Input
                     id="email"
                     type="email"
@@ -94,41 +94,40 @@ export default function ForgotPasswordPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full pl-10"
+                    className="w-full pl-12 py-4 text-base"
                   />
                 </div>
               </div>
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full py-4 text-lg mt-2"
                 disabled={isLoading}
               >
                 {isLoading ? "Sending..." : "Send Reset Link"}
               </Button>
             </form>
           ) : (
-            <div className="space-y-4 text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                <Mail className="h-8 w-8 text-green-600" />
+            <div className="space-y-6 text-center">
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                <Mail className="h-10 w-10 text-green-600" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-green-600">Check Your Email</h3>
-                <p className="text-sm text-gray-600 mt-2">
+                <h3 className="text-xl font-semibold text-green-600 mb-1">Check Your Email</h3>
+                <p className="text-base text-gray-600 mt-2">
                   We've sent a password reset link to <strong>{email}</strong>
                 </p>
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-sm text-gray-500 mt-2">
                   If you don't see the email, check your spam folder
                 </p>
               </div>
             </div>
           )}
-          
-          <div className="mt-6 text-center">
+          <div className="mt-10 text-center">
             <Link 
               href="/login" 
-              className="inline-flex items-center text-sm text-blue-600 hover:text-blue-500 font-medium"
+              className="inline-flex items-center text-base text-blue-600 hover:text-blue-500 font-medium"
             >
-              <ArrowLeft className="h-4 w-4 mr-1" />
+              <ArrowLeft className="h-5 w-5 mr-2" />
               Back to Sign In
             </Link>
           </div>

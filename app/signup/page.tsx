@@ -87,22 +87,22 @@ export default function SignupPage() {
         </div>
       </div>
 
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <div className="flex flex-col items-center justify-center mb-2 gap-2">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg mb-2">
-              <Package className="h-8 w-8 text-white" />
+      <Card className="w-full max-w-lg p-8 shadow-2xl">
+        <CardHeader className="space-y-2 pb-2">
+          <div className="flex flex-col items-center justify-center mb-6 gap-2">
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg mb-3">
+              <Package className="h-10 w-10 text-white" />
             </div>
-            <CardTitle className="text-2xl text-center">Create Account</CardTitle>
+            <CardTitle className="text-3xl text-center mb-2">Create Account</CardTitle>
           </div>
-          <CardDescription className="text-center mb-2">
+          <CardDescription className="text-center text-base mb-2">
             Welcome to the portal! Sign up to access your preferred dashboard.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSignup} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+        <CardContent className="pt-2 pb-6 px-2">
+          <form onSubmit={handleSignup} className="space-y-6">
+            <div className="space-y-3">
+              <Label htmlFor="email" className="text-base">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -110,12 +110,11 @@ export default function SignupPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full"
+                className="w-full py-4 text-base"
               />
-        </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+            </div>
+            <div className="space-y-3">
+              <Label htmlFor="password" className="text-base">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -124,7 +123,7 @@ export default function SignupPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full pr-10"
+                  className="w-full pr-10 py-4 text-base"
                 />
                 <Button
                   type="button"
@@ -141,10 +140,9 @@ export default function SignupPage() {
                 </Button>
               </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <div className="relative">
+            <div className="space-y-3">
+              <Label htmlFor="confirmPassword" className="text-base">Confirm Password</Label>
+              <div className="relative">
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
@@ -152,7 +150,7 @@ export default function SignupPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  className="w-full pr-10"
+                  className="w-full pr-10 py-4 text-base"
                 />
                 <Button
                   type="button"
@@ -169,15 +167,14 @@ export default function SignupPage() {
                 </Button>
               </div>
             </div>
-            
-            <div className="space-y-3">
+            <div className="space-y-4">
               <Label className="text-base font-medium">Select Portal Type *</Label>
               <RadioGroup
                 value={portalType}
                 onValueChange={setPortalType}
-                className="grid grid-cols-2 gap-4"
+                className="grid grid-cols-2 gap-6"
               >
-              <div>
+                <div>
                   <RadioGroupItem
                     value="product"
                     id="product"
@@ -185,18 +182,18 @@ export default function SignupPage() {
                   />
                   <Label
                     htmlFor="product"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-6 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
                   >
-                    <Package className="mb-3 h-6 w-6" />
+                    <Package className="mb-3 h-7 w-7" />
                     <div className="space-y-1 text-center">
-                      <p className="text-sm font-medium leading-none">Product Portal</p>
+                      <p className="text-base font-medium leading-none">Product Portal</p>
                       <p className="text-xs text-muted-foreground">
                         Manage inventory, suppliers, and products
                       </p>
                     </div>
                   </Label>
-              </div>
-              <div>
+                </div>
+                <div>
                   <RadioGroupItem
                     value="service"
                     id="service"
@@ -204,11 +201,11 @@ export default function SignupPage() {
                   />
                   <Label
                     htmlFor="service"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-6 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
                   >
-                    <Settings className="mb-3 h-6 w-6" />
+                    <Settings className="mb-3 h-7 w-7" />
                     <div className="space-y-1 text-center">
-                      <p className="text-sm font-medium leading-none">Service Portal</p>
+                      <p className="text-base font-medium leading-none">Service Portal</p>
                       <p className="text-xs text-muted-foreground">
                         Manage services, reports, and operations
                       </p>
@@ -216,25 +213,23 @@ export default function SignupPage() {
                   </Label>
                 </div>
               </RadioGroup>
-              </div>
-            
-              <Button
-                type="submit"
-              className="w-full mt-2"
+            </div>
+            <Button
+              type="submit"
+              className="w-full mt-2 py-4 text-lg"
               disabled={isLoading}
-              >
+            >
               {isLoading ? "Creating account..." : "Create Account"}
-              </Button>
+            </Button>
           </form>
-          
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+          <div className="mt-10 text-center">
+            <p className="text-base text-gray-600 dark:text-gray-400">
               Already have an account?{" "}
               <Link href="/login" className="text-blue-600 hover:text-blue-500 font-medium">
                 Sign in
               </Link>
             </p>
-        </div>
+          </div>
         </CardContent>
       </Card>
     </div>
