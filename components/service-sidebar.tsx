@@ -1,6 +1,18 @@
 "use client"
 
-import { Building2, FileText, Home, Settings, Users, Wallet, MoreHorizontal, Bot, Crown } from "lucide-react"
+import { 
+  Building2, 
+  FileText, 
+  Home, 
+  Settings, 
+  Users, 
+  Wallet, 
+  MoreHorizontal, 
+  Bot, 
+  Crown, 
+  Coffee, 
+  Car 
+} from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import React, { useState } from "react"
@@ -25,6 +37,16 @@ const menuItems = [
     title: "Dashboard",
     url: "/service",
     icon: Home,
+  },
+  {
+    title: "Coffee Processing",
+    url: "/service/coffee-processing",
+    icon: Coffee,
+  },
+  {
+    title: "Garage Management",
+    url: "/service/garage-management",
+    icon: Car,
   },
   {
     title: "Services",
@@ -72,10 +94,10 @@ export function ServiceSidebar() {
     <Sidebar className="border-r w-[200px]">
       <SidebarHeader className="p-3">
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-600">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
             <Settings className="h-4 w-4 text-white" />
           </div>
-          <span className="text-xl font-bold">Service Portal</span>
+          <span className="text-xl font-bold">Service System</span>
         </div>
       </SidebarHeader>
 

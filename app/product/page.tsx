@@ -23,6 +23,7 @@ export default function ProductPortal() {
   const router = useRouter()
   const { theme, setTheme } = useTheme()
   const [metricsLoading, setMetricsLoading] = useState(true)
+  const [businessCategory, setBusinessCategory] = useState("coffee")
   const [showAddProduct, setShowAddProduct] = useState(false)
   const [metricsData, setMetricsData] = useState([
     { date: "Jul 1", value: 120 },
@@ -62,6 +63,11 @@ export default function ProductPortal() {
     setMetricsLoading(true)
     const timer = setTimeout(() => setMetricsLoading(false), 1200)
     return () => clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    const category = localStorage.getItem("businessCategory") || "coffee"
+    setBusinessCategory(category)
   }, [])
   
   const handleLogout = () => {
@@ -139,7 +145,7 @@ export default function ProductPortal() {
                 <AvatarImage src="/placeholder.svg?height=32&width=32" />
                 <AvatarFallback>RU</AvatarFallback>
               </Avatar>
-              <span className="font-medium">Product Portal</span>
+              <span className="font-medium">Username</span>
             </div>
 
             <Tooltip>
@@ -176,9 +182,19 @@ export default function ProductPortal() {
             <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <h1 className="text-2xl font-bold mb-2">Welcome to Product Portal!</h1>
-                    <p className="text-blue-100 mb-4">Manage your inventory, suppliers, and product catalog</p>
+                                    <div>
+                    <h1 className="text-2xl font-bold mb-2">
+                      Welcome to {businessCategory === "coffee" ? "Coffee Management System" : 
+                                  businessCategory === "retail" ? "Retail Management System" :
+                                  businessCategory === "manufacturing" ? "Manufacturing Management System" :
+                                  "Agriculture Management System"}!
+                    </h1>
+                    <p className="text-blue-100 mb-4">
+                      {businessCategory === "coffee" ? "Manage your coffee farming, processing, and sales operations" :
+                       businessCategory === "retail" ? "Manage your retail inventory, sales, and customer operations" :
+                       businessCategory === "manufacturing" ? "Manage your production, inventory, and manufacturing operations" :
+                       "Manage your farming, crops, and agricultural operations"}
+                    </p>
                     <div className="flex space-x-3">
                       <Dialog open={showAddProduct} onOpenChange={setShowAddProduct}>
                         <DialogTrigger asChild>

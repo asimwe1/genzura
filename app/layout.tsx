@@ -5,7 +5,6 @@ import "./globals.css"
 import { AuthGuard } from "@/components/AuthGuard"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
-import AIChatGlobalWidget from "@/components/AIChatGlobalWidget"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -31,8 +30,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-        <AuthGuard>{children}</AuthGuard>
-        <AIChatGlobalWidget />
+          <AuthGuard>{children}</AuthGuard>
           <Toaster />
         </ThemeProvider>
       </body>

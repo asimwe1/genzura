@@ -1,107 +1,104 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Eye, EyeOff, Moon, Sun, Monitor, Package, Settings } from "lucide-react"
-import { useTheme } from "next-themes"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import Link from "next/link"
-import { toast } from "sonner"
+import { Package, Settings, Coffee, Car, ShoppingCart, Building2 } from "lucide-react"
 
 export default function SignupPage() {
+  const [organizationName, setOrganizationName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
-  const [portalType, setPortalType] = useState("product")
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [businessType, setBusinessType] = useState("product")
+  const [businessCategory, setBusinessCategory] = useState("coffee")
   const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
-  const { theme, setTheme } = useTheme()
+
+  const productCategories = [
+    { value: "coffee", label: "Coffee Management", icon: Coffee, description: "Coffee farming, processing, and sales" },
+    { value: "retail", label: "Retail Store", icon: ShoppingCart, description: "General retail and inventory management" },
+    { value: "manufacturing", label: "Manufacturing", icon: Building2, description: "Production and manufacturing operations" },
+    { value: "agriculture", label: "Agriculture", icon: Coffee, description: "Farming and agricultural management" }
+  ]
+
+  const serviceCategories = [
+    { value: "garage", label: "Auto Garage", icon: Car, description: "Automotive repair and maintenance services" },
+    { value: "consulting", label: "Consulting", icon: Settings, description: "Professional consulting services" },
+    { value: "healthcare", label: "Healthcare", icon: Settings, description: "Medical and healthcare services" },
+    { value: "education", label: "Education", icon: Settings, description: "Educational and training services" }
+  ]
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match")
+      alert("Passwords do not match")
       return
     }
     
     if (password.length < 6) {
-      toast.error("Password must be at least 6 characters")
+      alert("Password must be at least 6 characters")
       return
     }
     
     setIsLoading(true)
     
-    // Simulate API call
     setTimeout(() => {
-      // Store user data and portal preference
       localStorage.setItem("isAuth", "true")
       localStorage.setItem("userEmail", email)
-      localStorage.setItem("userPortal", portalType)
+      localStorage.setItem("organizationName", organizationName)
+      localStorage.setItem("businessType", businessType)
+      localStorage.setItem("businessCategory", businessCategory)
       
       setIsLoading(false)
-      
-      // Show success message
-      toast.success("Account created successfully!")
-      
-      // Redirect directly to appropriate portal (no login redirect)
-      window.location.href = portalType === "service" ? "/service" : "/product"
+      alert("Account created successfully!")
+      window.location.href = businessType === "service" ? "/service" : "/product"
     }, 1000)
   }
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
-      {/* Theme Toggler */}
-      <div className="absolute top-4 right-4">
-        <div className="flex items-center space-x-2 bg-white dark:bg-gray-800 rounded-lg p-2 shadow-lg">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setTheme("light")}
-            className={theme === "light" ? "bg-blue-100 text-blue-600" : ""}
-          >
-            <Sun className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setTheme("system")}
-            className={theme === "system" ? "bg-blue-100 text-blue-600" : ""}
-          >
-            <Monitor className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setTheme("dark")}
-            className={theme === "dark" ? "bg-blue-100 text-blue-600" : ""}
-          >
-            <Moon className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+  const getCurrentCategories = () => {
+    return businessType === "product" ? productCategories : serviceCategories
+  }
 
-      <Card className="w-full max-w-lg p-8 shadow-2xl">
-        <CardHeader className="space-y-2 pb-2">
-          <div className="flex flex-col items-center justify-center mb-6 gap-2">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg mb-3">
-              <Package className="h-10 w-10 text-white" />
+  const getCurrentCategory = () => {
+    const categories = getCurrentCategories()
+    return categories.find(cat => cat.value === businessCategory) || categories[0]
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
+      <Card className="w-full max-w-lg p-12 shadow-2xl">
+        <CardHeader className="space-y-6 pb-8">
+          <div className="flex flex-col items-center justify-center gap-4">
+            <div className="w-24 h-24 bg-gradient-to-br from-blue-600 to-purple-600 rounded-3xl flex items-center justify-center shadow-xl mb-2">
+              <Package className="h-12 w-12 text-white" />
             </div>
-            <CardTitle className="text-3xl text-center mb-2">Create Account</CardTitle>
+            <CardTitle className="text-4xl font-bold text-center text-gray-800">Create Account</CardTitle>
           </div>
-          <CardDescription className="text-center text-base mb-2">
-            Welcome to the portal! Sign up to access your preferred dashboard.
+          <CardDescription className="text-center text-lg text-gray-600 leading-relaxed">
+            Welcome to the business management system! Sign up to access your dashboard.
           </CardDescription>
         </CardHeader>
-        <CardContent className="pt-2 pb-6 px-2">
-          <form onSubmit={handleSignup} className="space-y-6">
-            <div className="space-y-3">
+        <CardContent className="pt-6 pb-10 px-6">
+          <form onSubmit={handleSignup} className="space-y-8">
+            <div className="space-y-4">
+              <Label htmlFor="organizationName" className="text-base">Organization Name *</Label>
+              <Input
+                id="organizationName"
+                type="text"
+                placeholder="Enter your organization name"
+                value={organizationName}
+                onChange={(e) => setOrganizationName(e.target.value)}
+                required
+                className="w-full py-4 text-base bg-white text-black border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 hover:border-gray-400 transition-colors"
+              />
+            </div>
+            <div className="space-y-4">
               <Label htmlFor="email" className="text-base">Email</Label>
               <Input
                 id="email"
@@ -110,68 +107,39 @@ export default function SignupPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full py-4 text-base"
+                className="w-full py-4 text-base bg-white text-black border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 hover:border-gray-400 transition-colors"
               />
             </div>
-            <div className="space-y-3">
+            <div className="space-y-4">
               <Label htmlFor="password" className="text-base">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="w-full pr-10 py-4 text-base"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <Label htmlFor="confirmPassword" className="text-base">Confirm Password</Label>
-              <div className="relative">
-                <Input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Confirm your password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  className="w-full pr-10 py-4 text-base"
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full py-4 text-base bg-white text-black border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 hover:border-gray-400 transition-colors"
+              />
             </div>
             <div className="space-y-4">
-              <Label className="text-base font-medium">Select Portal Type *</Label>
+              <Label htmlFor="confirmPassword" className="text-base">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="Confirm your password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                className="w-full py-4 text-base bg-white text-black border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 hover:border-gray-400 transition-colors"
+              />
+            </div>
+
+            <div className="space-y-4">
+              <Label className="text-base font-medium">Select Business Type *</Label>
               <RadioGroup
-                value={portalType}
-                onValueChange={setPortalType}
+                value={businessType}
+                onValueChange={setBusinessType}
                 className="grid grid-cols-2 gap-6"
               >
                 <div>
@@ -186,9 +154,9 @@ export default function SignupPage() {
                   >
                     <Package className="mb-3 h-7 w-7" />
                     <div className="space-y-1 text-center">
-                      <p className="text-base font-medium leading-none">Product Portal</p>
+                      <p className="text-base font-medium leading-none">Product-Based</p>
                       <p className="text-xs text-muted-foreground">
-                        Manage inventory, suppliers, and products
+                        Manage inventory, production, and products
                       </p>
                     </div>
                   </Label>
@@ -205,25 +173,54 @@ export default function SignupPage() {
                   >
                     <Settings className="mb-3 h-7 w-7" />
                     <div className="space-y-1 text-center">
-                      <p className="text-base font-medium leading-none">Service Portal</p>
+                      <p className="text-base font-medium leading-none">Service-Based</p>
                       <p className="text-xs text-muted-foreground">
-                        Manage services, reports, and operations
+                        Manage services, clients, and operations
                       </p>
                     </div>
                   </Label>
                 </div>
               </RadioGroup>
             </div>
+
+            <div className="space-y-4">
+              <Label className="text-base font-medium">Select Business Category *</Label>
+              <Select value={businessCategory} onValueChange={setBusinessCategory}>
+                <SelectTrigger className="w-full bg-white text-black border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 hover:border-gray-400 transition-colors">
+                  <SelectValue placeholder="Select business category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {getCurrentCategories().map((category) => (
+                    <SelectItem key={category.value} value={category.value}>
+                      <div className="flex items-center space-x-2">
+                        <category.icon className="h-4 w-4" />
+                        <span>{category.label}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {getCurrentCategory() && (
+                <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                  <div className="flex items-center space-x-2">
+                    <getCurrentCategory().icon className="h-4 w-4 text-blue-600" />
+                    <span className="font-medium">{getCurrentCategory().label}</span>
+                  </div>
+                  <p className="mt-1">{getCurrentCategory().description}</p>
+                </div>
+              )}
+            </div>
+
             <Button
               type="submit"
-              className="w-full mt-2 py-4 text-lg"
+              className="w-full mt-6 py-5 text-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors rounded-lg shadow-lg"
               disabled={isLoading}
             >
               {isLoading ? "Creating account..." : "Create Account"}
             </Button>
           </form>
-          <div className="mt-10 text-center">
-            <p className="text-base text-gray-600 dark:text-gray-400">
+          <div className="mt-16 text-center">
+            <p className="text-base text-gray-600">
               Already have an account?{" "}
               <Link href="/login" className="text-blue-600 hover:text-blue-500 font-medium">
                 Sign in

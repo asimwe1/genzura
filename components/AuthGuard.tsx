@@ -11,15 +11,18 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [isAuth, setIsAuth] = useState(false);
   const [checked, setChecked] = useState(false);
-  const [userPortal, setUserPortal] = useState("product");
+  const [businessType, setBusinessType] = useState("product");
+  const [businessCategory, setBusinessCategory] = useState("coffee");
 
   // Check auth status on mount and when pathname changes
   const checkAuth = () => {
     if (typeof window !== "undefined") {
       const authStatus = localStorage.getItem("isAuth") === "true";
-      const portal = localStorage.getItem("userPortal") || "product";
+      const type = localStorage.getItem("businessType") || "product";
+      const category = localStorage.getItem("businessCategory") || "coffee";
       setIsAuth(authStatus);
-      setUserPortal(portal);
+      setBusinessType(type);
+      setBusinessCategory(category);
       setChecked(true);
     }
   };
@@ -43,16 +46,16 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
     // If authenticated and on a public route, redirect to appropriate portal
     if (isAuth && isPublicRoute) {
-      router.replace(userPortal === "service" ? "/service" : "/product");
+      router.replace(businessType === "service" ? "/service" : "/product");
       return;
     }
 
     // If authenticated and on root path, redirect to appropriate portal
     if (isAuth && pathname === "/") {
-      router.replace(userPortal === "service" ? "/service" : "/product");
+      router.replace(businessType === "service" ? "/service" : "/product");
       return;
     }
-  }, [isAuth, checked, pathname, router, userPortal]);
+  }, [isAuth, checked, pathname, router, businessType]);
 
   // Show loading while checking auth
   if (!checked) {
@@ -81,8 +84,8 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   // Show dashboard with appropriate sidebar if authenticated and not on a public route
   if (checked && isAuth && !isPublicRoute) {
-    const isProductPortal = pathname.startsWith("/product") || (pathname === "/" && userPortal === "product");
-    const isServicePortal = pathname.startsWith("/service") || (pathname === "/" && userPortal === "service");
+    const isProductPortal = pathname.startsWith("/product") || (pathname === "/" && businessType === "product");
+    const isServicePortal = pathname.startsWith("/service") || (pathname === "/" && businessType === "service");
     let SidebarComponent = AppSidebar; // Default fallback
     if (isProductPortal) {
       SidebarComponent = ProductSidebar;

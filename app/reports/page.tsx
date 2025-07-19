@@ -11,9 +11,35 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 export default function Reports() {
   const [selectedPeriod, setSelectedPeriod] = useState("monthly")
 
+  const handleExport = () => {
+    // Create CSV content
+    const csvContent = [
+      ["Category", "Total Sales", "Total Items", "Avg Price", "Trend", "Change"],
+      ...reportData.map(item => [
+        item.category,
+        item.totalSales.toString(),
+        item.totalItems.toString(),
+        item.avgPrice.toString(),
+        item.trend,
+        item.change.toString()
+      ])
+    ].map(row => row.join(",")).join("\n")
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: "text/csv" })
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = `coffee-report-${selectedPeriod}-${new Date().toISOString().split('T')[0]}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+  }
+
   const reportData = [
     {
-      category: "Electronics",
+      category: "Supreme Cherry",
       totalSales: 45678,
       totalItems: 234,
       avgPrice: 195.23,
@@ -21,7 +47,7 @@ export default function Reports() {
       change: 12.5,
     },
     {
-      category: "Furniture",
+      category: "Parchment Coffee",
       totalSales: 23456,
       totalItems: 89,
       avgPrice: 263.66,
@@ -29,7 +55,7 @@ export default function Reports() {
       change: -5.2,
     },
     {
-      category: "Accessories",
+      category: "Fully Washed",
       totalSales: 12345,
       totalItems: 156,
       avgPrice: 79.13,
@@ -43,17 +69,13 @@ export default function Reports() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Reports & Analytics</h1>
-          <p className="text-gray-600">Track your inventory performance and trends</p>
+          <h1 className="text-3xl font-bold">Coffee Reports & Analytics</h1>
+          <p className="text-gray-600">Track your coffee farming, processing, and sales performance</p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline">
-            <Calendar className="h-4 w-4 mr-2" />
-            Date Range
-          </Button>
-          <Button variant="outline">
+          <Button variant="outline" onClick={() => handleExport()}>
             <Download className="h-4 w-4 mr-2" />
-            Export
+            Export Report
           </Button>
         </div>
       </div>
@@ -126,11 +148,11 @@ export default function Reports() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Avg Order Value</p>
-                <p className="text-2xl font-bold">$170.12</p>
+                <p className="text-sm font-medium text-gray-600">Total Expenses</p>
+                <p className="text-2xl font-bold">$45,230</p>
                 <div className="flex items-center mt-2">
-                  <TrendingDown className="h-4 w-4 text-red-600 mr-1" />
-                  <span className="text-sm text-red-600">-2.1%</span>
+                  <TrendingUp className="h-4 w-4 text-red-600 mr-1" />
+                  <span className="text-sm text-red-600">+8.3%</span>
                 </div>
               </div>
               <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -145,7 +167,7 @@ export default function Reports() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Top Category</p>
-                <p className="text-2xl font-bold">Electronics</p>
+                <p className="text-2xl font-bold">Supreme Cherry</p>
                 <div className="flex items-center mt-2">
                   <span className="text-sm text-gray-600">56% of sales</span>
                 </div>
@@ -186,7 +208,7 @@ export default function Reports() {
       {/* Detailed Report Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Category Performance Report</CardTitle>
+          <CardTitle>Coffee Category Performance Report</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>

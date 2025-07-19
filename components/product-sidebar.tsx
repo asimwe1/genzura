@@ -1,6 +1,19 @@
 "use client"
 
-import { Building2, FileText, Home, Package, Settings, Truck, Users, Wallet, MoreHorizontal, Bot, Crown } from "lucide-react"
+import { 
+  Building2, 
+  FileText, 
+  Home, 
+  Package, 
+  Settings, 
+  Truck, 
+  Users, 
+  Wallet, 
+  MoreHorizontal, 
+  Bot, 
+  Crown, 
+  Coffee 
+} from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import React, { useState } from "react"
@@ -25,6 +38,11 @@ const menuItems = [
     title: "Dashboard",
     url: "/product",
     icon: Home,
+  },
+  {
+    title: "Coffee Farming",
+    url: "/product/coffee-farming",
+    icon: Coffee,
   },
   {
     title: "Products",
@@ -85,7 +103,7 @@ export function ProductSidebar() {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
             <Package className="h-4 w-4 text-white" />
           </div>
-          <span className="text-xl font-bold">Product Portal</span>
+          <span className="text-xl font-bold">Product System</span>
         </div>
       </SidebarHeader>
 

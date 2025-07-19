@@ -18,6 +18,7 @@ export default function ServicePortal() {
   const router = useRouter()
   const { theme, setTheme } = useTheme()
   const [metricsLoading, setMetricsLoading] = useState(true)
+  const [businessCategory, setBusinessCategory] = useState("garage")
   const [metricsData, setMetricsData] = useState([
     { date: "Jul 1", value: 85 },
     { date: "Jul 2", value: 92 },
@@ -46,6 +47,11 @@ export default function ServicePortal() {
     setMetricsLoading(true)
     const timer = setTimeout(() => setMetricsLoading(false), 1200)
     return () => clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    const category = localStorage.getItem("businessCategory") || "garage"
+    setBusinessCategory(category)
   }, [])
   
   const handleLogout = () => {
@@ -98,7 +104,7 @@ export default function ServicePortal() {
                 <AvatarImage src="/placeholder.svg?height=32&width=32" />
                 <AvatarFallback>RU</AvatarFallback>
               </Avatar>
-              <span className="font-medium">Service Portal</span>
+              <span className="font-medium">Username</span>
             </div>
 
             <Tooltip>
@@ -132,20 +138,30 @@ export default function ServicePortal() {
           {/* Main Content */}
           <div className="lg:col-span-3 space-y-6">
             {/* Welcome Banner */}
-            <Card className="bg-gradient-to-r from-green-600 to-teal-600 text-white">
+            <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h1 className="text-2xl font-bold mb-2">Welcome to Service Portal!</h1>
-                    <p className="text-green-100 mb-4">Manage your services, clients, and operations</p>
+                    <h1 className="text-2xl font-bold mb-2">
+                      Welcome to {businessCategory === "garage" ? "Auto Garage Service System" : 
+                                  businessCategory === "consulting" ? "Consulting Service System" :
+                                  businessCategory === "healthcare" ? "Healthcare Service System" :
+                                  "Education Service System"}!
+                    </h1>
+                    <p className="text-blue-100 mb-4">
+                      {businessCategory === "garage" ? "Manage your automotive repair and maintenance services" :
+                       businessCategory === "consulting" ? "Manage your consulting services and client operations" :
+                       businessCategory === "healthcare" ? "Manage your healthcare services and patient care" :
+                       "Manage your educational services and training operations"}
+                    </p>
                     <div className="flex space-x-3">
-                      <Button className="bg-white text-green-600 hover:bg-gray-100">
+                      <Button className="bg-white text-blue-600 hover:bg-gray-100">
                         <Plus className="h-4 w-4 mr-2" />
                         Add Service
                       </Button>
                       <Button
                         variant="outline"
-                        className="border-white text-white hover:bg-white hover:text-green-600 bg-transparent"
+                        className="border-white text-white hover:bg-white hover:text-blue-600 bg-transparent"
                         onClick={() => router.push('/service/reports')}
                       >
                         View Reports
@@ -153,8 +169,8 @@ export default function ServicePortal() {
                     </div>
                   </div>
                   <div className="hidden md:block">
-                    <div className="w-32 h-32 bg-green-500/20 rounded-lg flex items-center justify-center">
-                      <Settings className="w-16 h-16 text-green-300" />
+                    <div className="w-32 h-32 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                      <Settings className="w-16 h-16 text-blue-300" />
                     </div>
                   </div>
                 </div>
