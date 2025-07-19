@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import { Bell, Search, Moon, ChevronDown, Plus, LogOut, Settings, FileText, Bot, Users, Wallet, MoreHorizontal, Building2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,7 +13,8 @@ import { useTheme } from "next-themes"
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, CartesianGrid, BarChart, Bar, PieChart, Pie, Cell } from "recharts"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useState, useEffect } from "react"
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+
 
 export default function ServicePortal() {
   const router = useRouter()
@@ -75,8 +77,7 @@ export default function ServicePortal() {
   ]
 
   return (
-    <TooltipProvider>
-      <div className="flex-1 space-y-3 py-2 pr-4 md:pr-8 lg:pr-12 xl:pr-16">
+    <div className="flex-1 space-y-3 py-2 pr-4 md:pr-8 lg:pr-12 xl:pr-16">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4 flex-1 max-w-md">
@@ -429,7 +430,6 @@ export default function ServicePortal() {
             </Card>
           </div>
         </div>
-      </div>
-    </TooltipProvider>
+    </div>
   )
 } 

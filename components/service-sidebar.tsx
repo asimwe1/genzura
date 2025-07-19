@@ -39,16 +39,6 @@ const menuItems = [
     icon: Home,
   },
   {
-    title: "Coffee Processing",
-    url: "/service/coffee-processing",
-    icon: Coffee,
-  },
-  {
-    title: "Garage Management",
-    url: "/service/garage-management",
-    icon: Car,
-  },
-  {
     title: "Services",
     url: "/service/services",
     icon: Settings,

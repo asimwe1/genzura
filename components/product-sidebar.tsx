@@ -40,11 +40,6 @@ const menuItems = [
     icon: Home,
   },
   {
-    title: "Coffee Farming",
-    url: "/product/coffee-farming",
-    icon: Coffee,
-  },
-  {
     title: "Products",
     url: "/product/products",
     icon: Package,

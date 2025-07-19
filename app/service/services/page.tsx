@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,8 +8,17 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Settings, DollarSign, Clock, Users } from "lucide-react"
+import { Plus, Settings, DollarSign, Clock, Users, Trash2, Edit, Save, X } from "lucide-react"
 import { toast } from "sonner"
+
+interface CustomField {
+  id: string
+  name: string
+  type: "text" | "number" | "select" | "textarea" | "date" | "email" | "phone"
+  required: boolean
+  options?: string[] // For select type
+  placeholder?: string
+}
 
 interface Service {
   id: string
@@ -20,6 +29,7 @@ interface Service {
   duration: string
   status: "active" | "inactive"
   teamSize: number
+  customFields: { [key: string]: any }
 }
 
 export default function ServicesPage() {
@@ -32,7 +42,8 @@ export default function ServicesPage() {
       price: "$150/hour",
       duration: "Flexible",
       status: "active",
-      teamSize: 3
+      teamSize: 3,
+      customFields: {}
     },
     {
       id: "2",
@@ -42,7 +53,8 @@ export default function ServicesPage() {
       price: "$75/hour",
       duration: "24/7",
       status: "active",
-      teamSize: 5
+      teamSize: 5,
+      customFields: {}
     },
     {
       id: "3",
@@ -52,12 +64,15 @@ export default function ServicesPage() {
       price: "$200/session",
       duration: "4 hours",
       status: "inactive",
-      teamSize: 2
+      teamSize: 2,
+      customFields: {}
     }
   ])
 
   const [showForm, setShowForm] = useState(false)
   const [editingService, setEditingService] = useState<Service | null>(null)
+  const [showCustomFields, setShowCustomFields] = useState(false)
+  const [customFields, setCustomFields] = useState<CustomField[]>([])
 
   const [formData, setFormData] = useState({
     name: "",
@@ -66,7 +81,8 @@ export default function ServicesPage() {
     price: "",
     duration: "",
     status: "active",
-    teamSize: 1
+    teamSize: 1,
+    customFields: {}
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -121,9 +137,38 @@ export default function ServicesPage() {
       price: service.price,
       duration: service.duration,
       status: service.status,
-      teamSize: service.teamSize
+      teamSize: service.teamSize,
+      customFields: service.customFields
     })
     setShowForm(true)
+  }
+
+  const addCustomField = () => {
+    const newField: CustomField = {
+      id: Date.now().toString(),
+      name: "",
+      type: "text",
+      required: false,
+      placeholder: ""
+    }
+    setCustomFields([...customFields, newField])
+  }
+
+  const updateCustomField = (id: string, field: Partial<CustomField>) => {
+    setCustomFields(customFields.map(f => f.id === id ? { ...f, ...field } : f))
+  }
+
+  const removeCustomField = (id: string) => {
+    setCustomFields(customFields.filter(f => f.id !== id))
+  }
+
+  const saveCustomFields = () => {
+    if (customFields.some(f => !f.name)) {
+      toast.error("All custom fields must have a name")
+      return
+    }
+    setShowCustomFields(false)
+    toast.success("Custom fields saved successfully!")
   }
 
   return (
@@ -282,6 +327,127 @@ export default function ServicesPage() {
                   </Select>
                 </div>
 
+                {/* Custom Fields Section */}
+                <div className="space-y-4 pt-4 border-t">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-base font-medium">Custom Fields</Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowCustomFields(true)}
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Manage Fields
+                    </Button>
+                  </div>
+                  
+                  {customFields.length > 0 && (
+                    <div className="space-y-3">
+                      {customFields.map((field) => (
+                        <div key={field.id} className="space-y-2">
+                          <Label htmlFor={field.id}>{field.name} {field.required && "*"}</Label>
+                          {field.type === "text" && (
+                            <Input
+                              id={field.id}
+                              placeholder={field.placeholder}
+                              value={formData.customFields[field.name] || ""}
+                              onChange={(e) => setFormData({
+                                ...formData,
+                                customFields: { ...formData.customFields, [field.name]: e.target.value }
+                              })}
+                              required={field.required}
+                            />
+                          )}
+                          {field.type === "number" && (
+                            <Input
+                              id={field.id}
+                              type="number"
+                              placeholder={field.placeholder}
+                              value={formData.customFields[field.name] || ""}
+                              onChange={(e) => setFormData({
+                                ...formData,
+                                customFields: { ...formData.customFields, [field.name]: e.target.value }
+                              })}
+                              required={field.required}
+                            />
+                          )}
+                          {field.type === "textarea" && (
+                            <Textarea
+                              id={field.id}
+                              placeholder={field.placeholder}
+                              value={formData.customFields[field.name] || ""}
+                              onChange={(e) => setFormData({
+                                ...formData,
+                                customFields: { ...formData.customFields, [field.name]: e.target.value }
+                              })}
+                              required={field.required}
+                            />
+                          )}
+                          {field.type === "select" && field.options && (
+                            <Select
+                              value={formData.customFields[field.name] || ""}
+                              onValueChange={(value) => setFormData({
+                                ...formData,
+                                customFields: { ...formData.customFields, [field.name]: value }
+                              })}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder={field.placeholder} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {field.options.map((option) => (
+                                  <SelectItem key={option} value={option}>
+                                    {option}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                          {field.type === "date" && (
+                            <Input
+                              id={field.id}
+                              type="date"
+                              value={formData.customFields[field.name] || ""}
+                              onChange={(e) => setFormData({
+                                ...formData,
+                                customFields: { ...formData.customFields, [field.name]: e.target.value }
+                              })}
+                              required={field.required}
+                            />
+                          )}
+                          {field.type === "email" && (
+                            <Input
+                              id={field.id}
+                              type="email"
+                              placeholder={field.placeholder}
+                              value={formData.customFields[field.name] || ""}
+                              onChange={(e) => setFormData({
+                                ...formData,
+                                customFields: { ...formData.customFields, [field.name]: e.target.value }
+                              })}
+                              required={field.required}
+                            />
+                          )}
+                          {field.type === "phone" && (
+                            <Input
+                              id={field.id}
+                              type="tel"
+                              placeholder={field.placeholder}
+                              value={formData.customFields[field.name] || ""}
+                              onChange={(e) => setFormData({
+                                ...formData,
+                                customFields: { ...formData.customFields, [field.name]: e.target.value }
+                              })}
+                              required={field.required}
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex space-x-2 pt-4">
                   <Button type="submit" className="flex-1">
                     {editingService ? "Update Service" : "Add Service"}
@@ -362,6 +528,126 @@ export default function ServicesPage() {
           </div>
         )}
       </div>
+
+      {/* Custom Fields Management Dialog */}
+      {showCustomFields && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>Manage Custom Fields</span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowCustomFields(false)}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </CardTitle>
+              <CardDescription>
+                Create custom fields for your services. These fields will appear in the service form.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {customFields.map((field) => (
+                <Card key={field.id} className="p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Field Name *</Label>
+                      <Input
+                        value={field.name}
+                        onChange={(e) => updateCustomField(field.id, { name: e.target.value })}
+                        placeholder="e.g., Client Requirements"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Field Type</Label>
+                      <Select
+                        value={field.type}
+                        onValueChange={(value) => updateCustomField(field.id, { type: value as any })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="text">Text</SelectItem>
+                          <SelectItem value="number">Number</SelectItem>
+                          <SelectItem value="textarea">Text Area</SelectItem>
+                          <SelectItem value="select">Select</SelectItem>
+                          <SelectItem value="date">Date</SelectItem>
+                          <SelectItem value="email">Email</SelectItem>
+                          <SelectItem value="phone">Phone</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Placeholder</Label>
+                      <Input
+                        value={field.placeholder || ""}
+                        onChange={(e) => updateCustomField(field.id, { placeholder: e.target.value })}
+                        placeholder="Optional placeholder text"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Required</Label>
+                      <Select
+                        value={field.required ? "true" : "false"}
+                        onValueChange={(value) => updateCustomField(field.id, { required: value === "true" })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="true">Yes</SelectItem>
+                          <SelectItem value="false">No</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {field.type === "select" && (
+                      <div className="md:col-span-2 space-y-2">
+                        <Label>Options (comma-separated)</Label>
+                        <Input
+                          value={field.options?.join(", ") || ""}
+                          onChange={(e) => updateCustomField(field.id, { 
+                            options: e.target.value.split(",").map(opt => opt.trim()).filter(opt => opt)
+                          })}
+                          placeholder="Option 1, Option 2, Option 3"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex justify-end mt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeCustomField(field.id)}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Remove Field
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+              
+              <div className="flex justify-between pt-4">
+                <Button onClick={addCustomField} variant="outline">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Custom Field
+                </Button>
+                <div className="space-x-2">
+                  <Button variant="outline" onClick={() => setShowCustomFields(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={saveCustomFields}>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Fields
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   )
 } 

@@ -2,7 +2,7 @@
 
 import { AIChat } from "@/components/ai-chat";
 import { Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function ProductAIChatPage() {
   const [loading, setLoading] = useState(true);
