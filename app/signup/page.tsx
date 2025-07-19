@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Link from "next/link";
-import { Package, Settings, Coffee, Car, ShoppingCart, Building2 } from "lucide-react";
+import { Package, Settings, Coffee, Car, ShoppingCart, Building2, MoreHorizontal } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 export default function SignupPage() {
   const [organizationName, setOrganizationName] = useState("");
@@ -17,6 +18,7 @@ export default function SignupPage() {
   const [businessType, setBusinessType] = useState("product");
   const [businessCategory, setBusinessCategory] = useState("coffee");
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -36,10 +38,25 @@ export default function SignupPage() {
       localStorage.setItem("businessType", businessType);
       localStorage.setItem("businessCategory", businessCategory);
       setIsLoading(false);
-      alert("Account created successfully!");
-      window.location.href = businessType === "service" ? "/service" : "/product";
+      setShowSuccess(true);
     }, 1000);
   };
+
+  const productCategories = [
+    { value: "coffee", label: "Coffee Management", icon: Coffee },
+    { value: "retail", label: "Retail Store", icon: ShoppingCart },
+    { value: "manufacturing", label: "Manufacturing", icon: Building2 },
+    { value: "agriculture", label: "Agriculture", icon: Coffee },
+    { value: "other", label: "Other", icon: MoreHorizontal },
+  ];
+  const serviceCategories = [
+    { value: "garage", label: "Auto Garage", icon: Car },
+    { value: "consulting", label: "Consulting", icon: Settings },
+    { value: "healthcare", label: "Healthcare", icon: Settings },
+    { value: "education", label: "Education", icon: Settings },
+    { value: "other", label: "Other", icon: MoreHorizontal },
+  ];
+  const categories = businessType === "product" ? productCategories : serviceCategories;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
@@ -159,33 +176,14 @@ export default function SignupPage() {
                   <SelectValue placeholder="Select business category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {businessType === "product"
-                    ? [
-                        { value: "coffee", label: "Coffee Management", icon: Coffee },
-                        { value: "retail", label: "Retail Store", icon: ShoppingCart },
-                        { value: "manufacturing", label: "Manufacturing", icon: Building2 },
-                        { value: "agriculture", label: "Agriculture", icon: Coffee },
-                      ].map((category) => (
-                        <SelectItem key={category.value} value={category.value}>
-                          <div className="flex items-center space-x-2">
-                            <category.icon className="h-4 w-4" />
-                            <span>{category.label}</span>
-                          </div>
-                        </SelectItem>
-                      ))
-                    : [
-                        { value: "garage", label: "Auto Garage", icon: Car },
-                        { value: "consulting", label: "Consulting", icon: Settings },
-                        { value: "healthcare", label: "Healthcare", icon: Settings },
-                        { value: "education", label: "Education", icon: Settings },
-                      ].map((category) => (
-                        <SelectItem key={category.value} value={category.value}>
-                          <div className="flex items-center space-x-2">
-                            <category.icon className="h-4 w-4" />
-                            <span>{category.label}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
+                  {categories.map((category) => (
+                    <SelectItem key={category.value} value={category.value}>
+                      <div className="flex items-center space-x-2">
+                        <category.icon className="h-4 w-4" />
+                        <span>{category.label}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -207,6 +205,27 @@ export default function SignupPage() {
           </form>
         </CardContent>
       </Card>
+      {/* Floating Modal Prompt */}
+      {showSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 flex flex-col items-center border border-blue-100 animate-fade-in">
+            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
+              <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+            </div>
+            <h2 className="text-2xl font-bold text-green-700 mb-2">Account Created!</h2>
+            <p className="text-gray-700 text-center mb-6">Your account has been created successfully.<br />You will be redirected to your portal.</p>
+            <Button
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold py-3 rounded-xl shadow"
+              onClick={() => {
+                setShowSuccess(false);
+                window.location.href = businessType === "service" ? "/service" : "/product";
+              }}
+            >
+              Go to Portal
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
