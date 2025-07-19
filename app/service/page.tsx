@@ -76,6 +76,19 @@ export default function ServicePortal() {
     { name: "David", avatar: "/placeholder.svg?height=32&width=32" },
   ]
 
+  const defaultCategories = ["garage", "consulting", "healthcare", "education"];
+  const isCustomCategory = !defaultCategories.includes(businessCategory);
+  const [editingCategory, setEditingCategory] = useState(false);
+  const [customCategory, setCustomCategory] = useState(isCustomCategory ? businessCategory : "");
+
+  const handleCustomCategorySave = () => {
+    if (customCategory.trim()) {
+      setBusinessCategory(customCategory.trim());
+      localStorage.setItem("businessCategory", customCategory.trim());
+      setEditingCategory(false);
+    }
+  };
+
   return (
     <div className="flex-1 space-y-3 py-2 pr-4 md:pr-8 lg:pr-12 xl:pr-16">
         {/* Header */}
@@ -144,16 +157,38 @@ export default function ServicePortal() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h1 className="text-2xl font-bold mb-2">
-                      Welcome to {businessCategory === "garage" ? "Auto Garage Service System" : 
-                                  businessCategory === "consulting" ? "Consulting Service System" :
-                                  businessCategory === "healthcare" ? "Healthcare Service System" :
-                                  "Education Service System"}!
+                      {isCustomCategory && !editingCategory ? (
+                        <>
+                          Welcome to <span className="inline-block px-2 py-1 rounded bg-white/10 text-yellow-200 font-semibold">{businessCategory}</span> Service System!
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="ml-2 text-xs text-yellow-200 hover:text-yellow-300 hover:bg-white/10 px-2 py-1"
+                            onClick={() => setEditingCategory(true)}
+                          >
+                            Edit
+                          </Button>
+                        </>
+                      ) : editingCategory ? (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            value={customCategory}
+                            onChange={e => setCustomCategory(e.target.value)}
+                            className="w-auto px-2 py-1 text-black dark:text-white bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded"
+                            placeholder="Your service name"
+                            autoFocus
+                          />
+                          <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white px-3 py-1" onClick={handleCustomCategorySave}>Save</Button>
+                          <Button size="sm" variant="ghost" className="text-white px-2 py-1" onClick={() => setEditingCategory(false)}>Cancel</Button>
+                        </div>
+                      ) : (
+                        <>Welcome to {businessCategory === "garage" ? "Auto Garage Service System" : businessCategory === "consulting" ? "Consulting Service System" : businessCategory === "healthcare" ? "Healthcare Service System" : "Education Service System"}! </>
+                      )}
                     </h1>
                     <p className="text-blue-100 mb-4">
-                      {businessCategory === "garage" ? "Manage your automotive repair and maintenance services" :
-                       businessCategory === "consulting" ? "Manage your consulting services and client operations" :
-                       businessCategory === "healthcare" ? "Manage your healthcare services and patient care" :
-                       "Manage your educational services and training operations"}
+                      {isCustomCategory ? (
+                        <>Manage your <span className="font-semibold text-yellow-200">{businessCategory}</span> services and operations</>
+                      ) : businessCategory === "garage" ? "Manage your automotive repair and maintenance services" : businessCategory === "consulting" ? "Manage your consulting services and client operations" : businessCategory === "healthcare" ? "Manage your healthcare services and patient care" : "Manage your educational services and training operations"}
                     </p>
                     <div className="flex space-x-3">
                       <Button className="bg-white text-blue-600 hover:bg-gray-100">

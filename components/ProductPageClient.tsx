@@ -60,6 +60,19 @@ export default function ProductPageClient() {
     sku: ""
   });
 
+  const defaultCategories = ["coffee", "retail", "manufacturing", "agriculture"];
+  const isCustomCategory = !defaultCategories.includes(businessCategory);
+  const [editingCategory, setEditingCategory] = useState(false);
+  const [customCategory, setCustomCategory] = useState(isCustomCategory ? businessCategory : "");
+
+  const handleCustomCategorySave = () => {
+    if (customCategory.trim()) {
+      setBusinessCategory(customCategory.trim());
+      localStorage.setItem("businessCategory", customCategory.trim());
+      setEditingCategory(false);
+    }
+  };
+
   useEffect(() => {
     setMetricsLoading(true);
     const timer = setTimeout(() => setMetricsLoading(false), 1200);
@@ -177,10 +190,38 @@ export default function ProductPageClient() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h1 className="text-2xl font-bold mb-2">
-                        Welcome to Product Management System!
+                        {isCustomCategory && !editingCategory ? (
+                          <>
+                            Welcome to <span className="inline-block px-2 py-1 rounded bg-white/10 text-yellow-200 font-semibold">{businessCategory}</span> Management System!
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="ml-2 text-xs text-yellow-200 hover:text-yellow-300 hover:bg-white/10 px-2 py-1"
+                              onClick={() => setEditingCategory(true)}
+                            >
+                              Edit
+                            </Button>
+                          </>
+                        ) : editingCategory ? (
+                          <div className="flex items-center gap-2">
+                            <Input
+                              value={customCategory}
+                              onChange={e => setCustomCategory(e.target.value)}
+                              className="w-auto px-2 py-1 text-black dark:text-white bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded"
+                              placeholder="Your product or business name"
+                              autoFocus
+                            />
+                            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white px-3 py-1" onClick={handleCustomCategorySave}>Save</Button>
+                            <Button size="sm" variant="ghost" className="text-white px-2 py-1" onClick={() => setEditingCategory(false)}>Cancel</Button>
+                          </div>
+                        ) : (
+                          <>Welcome to Product Management System!</>
+                        )}
                       </h1>
                       <p className="text-blue-100 mb-4">
-                        Manage your product inventory, suppliers, and business operations
+                        {isCustomCategory ? (
+                          <>Manage your <span className="font-semibold text-yellow-200">{businessCategory}</span> products and operations</>
+                        ) : "Manage your product inventory, suppliers, and business operations"}
                       </p>
                       <div className="flex space-x-3">
                         <Dialog open={showAddProduct} onOpenChange={setShowAddProduct}>

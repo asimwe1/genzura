@@ -80,8 +80,8 @@ export function AppSidebar() {
 
   return (
     <>
-    <Sidebar className="border-r w-[200px]">
-      <SidebarHeader className="p-3">
+    <Sidebar className="border-r w-[200px] bg-sidebar text-sidebar-foreground dark:bg-sidebar dark:text-sidebar-foreground">
+      <SidebarHeader className="p-3 border-b border-sidebar-border dark:border-sidebar-border bg-sidebar dark:bg-sidebar">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
             <Package className="h-4 w-4 text-white" />

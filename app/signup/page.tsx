@@ -17,6 +17,7 @@ export default function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [businessType, setBusinessType] = useState("product");
   const [businessCategory, setBusinessCategory] = useState("coffee");
+  const [customCategory, setCustomCategory] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -30,13 +31,17 @@ export default function SignupPage() {
       alert("Password must be at least 6 characters");
       return;
     }
+    if (businessCategory === "other" && !customCategory.trim()) {
+      alert("Please specify your service or product");
+      return;
+    }
     setIsLoading(true);
     setTimeout(() => {
       localStorage.setItem("isAuth", "true");
       localStorage.setItem("userEmail", email);
       localStorage.setItem("organizationName", organizationName);
       localStorage.setItem("businessType", businessType);
-      localStorage.setItem("businessCategory", businessCategory);
+      localStorage.setItem("businessCategory", businessCategory === "other" ? customCategory : businessCategory);
       setIsLoading(false);
       setShowSuccess(true);
     }, 1000);
@@ -186,6 +191,20 @@ export default function SignupPage() {
                   ))}
                 </SelectContent>
               </Select>
+              {businessCategory === "other" && (
+                <div className="pt-2">
+                  <Label htmlFor="customCategory" className="text-base">Specify your service or product *</Label>
+                  <Input
+                    id="customCategory"
+                    type="text"
+                    placeholder={businessType === "service" ? "e.g. Plumbing, Legal, etc." : "e.g. Electronics, Books, etc."}
+                    value={customCategory}
+                    onChange={(e) => setCustomCategory(e.target.value)}
+                    required
+                    className="w-full py-3 text-base bg-white text-black border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 hover:border-gray-400 transition-colors mt-2"
+                  />
+                </div>
+              )}
             </div>
             <Button
               type="submit"
