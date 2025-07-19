@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+  <g>
+    <!-- Maximum size, centered blue Genzura icon -->
+    <g transform="translate(2,2) scale(1.5)">
+      <path fill="#2563eb" fill-rule="evenodd" d="m7.839 40.783 16.03-28.054L20 6 0 40.783h7.839Zm8.214 0H40L27.99 19.894l-4.02 7.032 3.976 6.914H20.02l-3.967 6.943Z" clip-rule="evenodd"/>
+    </g>
+    <!-- (Optional: very small text, but prioritize icon) -->
+    <!-- <text x="32" y="62" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="10" font-weight="bold" fill="#171717">Genzura</text> -->
+  </g>
+</svg> 

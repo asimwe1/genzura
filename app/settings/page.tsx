@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { User, Bell, Shield, Database, Palette, Save, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,6 +10,8 @@ import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { toast } from "sonner"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 
 export default function Settings() {
   const [showPassword, setShowPassword] = useState(false)
@@ -45,6 +47,53 @@ export default function Settings() {
     currency: "USD",
   })
 
+  const [showConfirm, setShowConfirm] = useState<{ open: boolean; action: string | null }>({ open: false, action: null })
+  const [showPhotoDialog, setShowPhotoDialog] = useState(false)
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [showPasswordFields, setShowPasswordFields] = useState(false)
+  const [passwords, setPasswords] = useState({ current: "", new: "" })
+
+  // Save all changes
+  const handleSaveAll = () => {
+    toast.success("All changes saved!")
+  }
+
+  // Change photo
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setPhotoFile(e.target.files[0])
+      toast.success("Photo selected: " + e.target.files[0].name)
+      setShowPhotoDialog(false)
+    }
+  }
+
+  // Password change
+  const handlePasswordChange = () => {
+    if (!passwords.current || !passwords.new) {
+      toast.error("Please fill in both password fields.")
+      return
+    }
+    setShowConfirm({ open: true, action: "Change Password" })
+  }
+
+  // Confirm sensitive actions
+  const handleConfirm = () => {
+    if (showConfirm.action === "Change Password") {
+      toast.success("Password changed successfully!")
+      setPasswords({ current: "", new: "" })
+    } else if (showConfirm.action === "Enable 2FA") {
+      toast.success("Two-Factor Authentication enabled!")
+    } else if (showConfirm.action === "Disable 2FA") {
+      toast.success("Two-Factor Authentication disabled!")
+    }
+    setShowConfirm({ open: false, action: null })
+  }
+
+  // Maintenance actions
+  const handleMaintenance = (action: string) => {
+    toast.success(`${action} completed!`)
+  }
+
   return (
     <div className="flex-1 space-y-6 p-6">
       {/* Header */}
@@ -53,7 +102,7 @@ export default function Settings() {
           <h1 className="text-3xl font-bold">Settings</h1>
           <p className="text-gray-600">Manage your account and system preferences</p>
         </div>
-        <Button className="bg-blue-600 hover:bg-blue-700">
+        <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleSaveAll}>
           <Save className="h-4 w-4 mr-2" />
           Save All Changes
         </Button>
@@ -84,7 +133,7 @@ export default function Settings() {
                   <AvatarFallback>RA</AvatarFallback>
                 </Avatar>
                 <div>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => setShowPhotoDialog(true)}>
                     Change Photo
                   </Button>
                   <p className="text-sm text-gray-500 mt-1">JPG, PNG or GIF. Max size 2MB.</p>
@@ -142,6 +191,8 @@ export default function Settings() {
                         id="currentPassword"
                         type={showPassword ? "text" : "password"}
                         placeholder="Enter current password"
+                        value={passwords.current}
+                        onChange={e => setPasswords({ ...passwords, current: e.target.value })}
                       />
                       <Button
                         type="button"
@@ -160,9 +211,12 @@ export default function Settings() {
                       id="newPassword"
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter new password"
+                      value={passwords.new}
+                      onChange={e => setPasswords({ ...passwords, new: e.target.value })}
                     />
                   </div>
                 </div>
+                <Button variant="outline" onClick={handlePasswordChange}>Change Password</Button>
               </div>
             </CardContent>
           </Card>
@@ -271,7 +325,10 @@ export default function Settings() {
                   </div>
                   <Switch
                     checked={security.twoFactorAuth}
-                    onCheckedChange={(checked) => setSecurity({ ...security, twoFactorAuth: checked })}
+                    onCheckedChange={(checked) => {
+                      setSecurity({ ...security, twoFactorAuth: checked })
+                      setShowConfirm({ open: true, action: checked ? "Enable 2FA" : "Disable 2FA" })
+                    }}
                   />
                 </div>
               </div>
@@ -433,15 +490,41 @@ export default function Settings() {
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Maintenance</h3>
                 <div className="flex space-x-2">
-                  <Button variant="outline">Clear Cache</Button>
-                  <Button variant="outline">Optimize Database</Button>
-                  <Button variant="outline">Check Updates</Button>
+                  <Button variant="outline" onClick={() => handleMaintenance("Clear Cache")}>Clear Cache</Button>
+                  <Button variant="outline" onClick={() => handleMaintenance("Optimize Database")}>Optimize Database</Button>
+                  <Button variant="outline" onClick={() => handleMaintenance("Check Updates")}>Check Updates</Button>
                 </div>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Confirm Dialog for sensitive actions */}
+      <Dialog open={showConfirm.open} onOpenChange={(open) => setShowConfirm({ open, action: showConfirm.action })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Are you sure?</DialogTitle>
+          </DialogHeader>
+          <p>This action cannot be undone. Proceed with {showConfirm.action}?</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfirm({ open: false, action: null })}>Cancel</Button>
+            <Button variant="destructive" onClick={handleConfirm}>Yes, Proceed</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* Dialog for Change Photo */}
+      <Dialog open={showPhotoDialog} onOpenChange={setShowPhotoDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Profile Photo</DialogTitle>
+          </DialogHeader>
+          <input type="file" accept="image/*" onChange={handlePhotoChange} />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPhotoDialog(false)}>Cancel</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
