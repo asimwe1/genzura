@@ -22,6 +22,7 @@ export default function ServicePortal() {
   const { theme, setTheme } = useTheme()
   const [metricsLoading, setMetricsLoading] = useState(true)
   const [businessCategory, setBusinessCategory] = useState("garage")
+  const [username, setUsername] = useState<string>("User")
   const [metricsData, setMetricsData] = useState([
     { date: "Jul 1", value: 85 },
     { date: "Jul 2", value: 92 },
@@ -57,6 +58,10 @@ export default function ServicePortal() {
   useEffect(() => {
     const category = localStorage.getItem("businessCategory") || "garage"
     setBusinessCategory(category)
+    // Username logic
+    const orgName = localStorage.getItem("organizationName")
+    const userEmail = localStorage.getItem("userEmail")
+    setUsername(orgName || userEmail || "User")
   }, [])
   
   const handleLogout = () => {
@@ -121,7 +126,7 @@ export default function ServicePortal() {
                 <AvatarImage src="/placeholder.svg?height=32&width=32" />
                 <AvatarFallback>RU</AvatarFallback>
               </Avatar>
-              <span className="font-medium">Username</span>
+              <span className="font-medium">{username}</span>
             </div>
 
             <Tooltip>
