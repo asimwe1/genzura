@@ -14,6 +14,7 @@ import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, CartesianGrid, BarC
 import { Skeleton } from "@/components/ui/skeleton"
 import { useState, useEffect } from "react"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 
 export default function ServicePortal() {
@@ -44,6 +45,8 @@ export default function ServicePortal() {
     { name: "Training Session", status: "Scheduled", revenue: "$1,200" },
     { name: "System Implementation", status: "In Progress", revenue: "$5,000" },
   ])
+
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
     setMetricsLoading(true)
@@ -92,7 +95,7 @@ export default function ServicePortal() {
   return (
     <div className="flex-1 space-y-3 py-2 pr-4 md:pr-8 lg:pr-12 xl:pr-16">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pt-6 sm:pt-8 md:pt-4">
           <div className="flex items-center space-x-4 flex-1 max-w-md">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -135,7 +138,7 @@ export default function ServicePortal() {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  onClick={handleLogout}
+                  onClick={() => setShowLogoutModal(true)}
                   className="bg-red-100 hover:bg-red-200 rounded-full p-2 border border-red-300 shadow-md"
                   aria-label="Logout"
                   tabIndex={0}
@@ -465,6 +468,20 @@ export default function ServicePortal() {
             </Card>
           </div>
         </div>
+        <Dialog open={showLogoutModal} onOpenChange={setShowLogoutModal}>
+          <DialogContent className="max-w-sm mx-auto">
+            <DialogHeader>
+              <DialogTitle>Are you sure you want to log out?</DialogTitle>
+              <DialogDescription>
+                You will be logged out of your account. Do you want to continue?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col gap-3 mt-4">
+              <Button className="bg-red-600 hover:bg-red-700 text-white" onClick={handleLogout}>Yes, log out</Button>
+              <Button variant="outline" onClick={() => setShowLogoutModal(false)}>Cancel</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
     </div>
   )
 } 
