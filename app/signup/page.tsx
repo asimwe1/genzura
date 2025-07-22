@@ -8,7 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Link from "next/link";
 import AuthForm from "@/components/ui/AuthForm";
-import { Package, Settings, Inventory, Car, ShoppingCart, Building2, MoreHorizontal } from "lucide-react";
+import { Package, Settings, Box, Car, ShoppingCart, Building2, MoreHorizontal } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 export default function SignupPage() {
@@ -47,10 +47,10 @@ export default function SignupPage() {
     }, 1000);
   };
   const productCategories = [
-    { value: "inventory", label: "Inventory Management", icon: Inventory },
+    { value: "inventory", label: "Inventory Management", icon: Box },
     { value: "retail", label: "Retail Store", icon: ShoppingCart },
     { value: "manufacturing", label: "Manufacturing", icon: Building2 },
-    { value: "agriculture", label: "Agriculture", icon: Inventory },
+    { value: "agriculture", label: "Agriculture", icon: Box },
     { value: "other", label: "Other", icon: MoreHorizontal },
   ];
   const serviceCategories = [
