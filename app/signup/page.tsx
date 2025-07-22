@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Link from "next/link";
-import { Package, Settings, Coffee, Car, ShoppingCart, Building2, MoreHorizontal } from "lucide-react";
+import AuthForm from "@/components/ui/AuthForm";
+import { Package, Settings, Inventory, Car, ShoppingCart, Building2, MoreHorizontal } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 export default function SignupPage() {
@@ -16,12 +17,11 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [businessType, setBusinessType] = useState("product");
-  const [businessCategory, setBusinessCategory] = useState("coffee");
+  const [businessCategory, setBusinessCategory] = useState("inventory");
   const [customCategory, setCustomCategory] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-
-  const handleSignup = async (e) => {
+  const handleSignup = (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       alert("Passwords do not match");
@@ -46,12 +46,11 @@ export default function SignupPage() {
       setShowSuccess(true);
     }, 1000);
   };
-
   const productCategories = [
-    { value: "coffee", label: "Coffee Management", icon: Coffee },
+    { value: "inventory", label: "Inventory Management", icon: Inventory },
     { value: "retail", label: "Retail Store", icon: ShoppingCart },
     { value: "manufacturing", label: "Manufacturing", icon: Building2 },
-    { value: "agriculture", label: "Agriculture", icon: Coffee },
+    { value: "agriculture", label: "Agriculture", icon: Inventory },
     { value: "other", label: "Other", icon: MoreHorizontal },
   ];
   const serviceCategories = [
@@ -62,10 +61,9 @@ export default function SignupPage() {
     { value: "other", label: "Other", icon: MoreHorizontal },
   ];
   const categories = businessType === "product" ? productCategories : serviceCategories;
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-      <Card className="w-full max-w-lg p-12 shadow-2xl">
+      <div className="w-full max-w-lg p-12 shadow-2xl">
         <CardHeader className="space-y-6 pb-8">
           <div className="flex flex-col items-center justify-center gap-4">
             <div className="w-24 h-24 bg-gradient-to-br from-blue-600 to-purple-600 rounded-3xl flex items-center justify-center shadow-xl mb-2">
@@ -78,55 +76,49 @@ export default function SignupPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6 pb-10 px-6">
-          <form className="space-y-8" onSubmit={handleSignup}>
-            <div className="space-y-4">
-              <Label htmlFor="organizationName" className="text-base">Organization Name *</Label>
-              <Input
-                id="organizationName"
-                type="text"
-                placeholder="Enter your organization name"
-                value={organizationName}
-                onChange={(e) => setOrganizationName(e.target.value)}
-                required
-                className="w-full py-4 text-base bg-white text-black border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 hover:border-gray-400 transition-colors"
-              />
-            </div>
-            <div className="space-y-4">
-              <Label htmlFor="email" className="text-base">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full py-4 text-base bg-white text-black border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 hover:border-gray-400 transition-colors"
-              />
-            </div>
-            <div className="space-y-4">
-              <Label htmlFor="password" className="text-base">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full py-4 text-base bg-white text-black border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 hover:border-gray-400 transition-colors"
-              />
-            </div>
-            <div className="space-y-4">
-              <Label htmlFor="confirmPassword" className="text-base">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="Confirm your password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="w-full py-4 text-base bg-white text-black border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 hover:border-gray-400 transition-colors"
-              />
-            </div>
+          <AuthForm
+            mode="signup"
+            onSubmit={handleSignup}
+            loading={isLoading}
+            fields={[
+              {
+                name: "organizationName",
+                label: "Organization Name *",
+                type: "text",
+                placeholder: "Enter your organization name",
+                required: true,
+                value: organizationName,
+                onChange: (e) => setOrganizationName(e.target.value),
+              },
+              {
+                name: "email",
+                label: "Email",
+                type: "email",
+                placeholder: "Enter your email",
+                required: true,
+                value: email,
+                onChange: (e) => setEmail(e.target.value),
+              },
+              {
+                name: "password",
+                label: "Password",
+                type: "password",
+                placeholder: "Enter your password",
+                required: true,
+                value: password,
+                onChange: (e) => setPassword(e.target.value),
+              },
+              {
+                name: "confirmPassword",
+                label: "Confirm Password",
+                type: "password",
+                placeholder: "Confirm your password",
+                required: true,
+                value: confirmPassword,
+                onChange: (e) => setConfirmPassword(e.target.value),
+              },
+            ]}
+          >
             <div className="space-y-4">
               <Label className="text-base font-medium">Select Business Type *</Label>
               <RadioGroup
@@ -206,24 +198,17 @@ export default function SignupPage() {
                 </div>
               )}
             </div>
-            <Button
-              type="submit"
-              className="w-full mt-6 py-5 text-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors rounded-lg shadow-lg"
-              disabled={isLoading}
-            >
-              {isLoading ? "Creating account..." : "Create Account"}
-            </Button>
-            <div className="mt-16 text-center">
-              <p className="text-base text-gray-600">
-                Already have an account?{" "}
-                <Link href="/login" className="text-blue-600 hover:text-blue-500 font-medium">
-                  Sign in
-                </Link>
-              </p>
-            </div>
-          </form>
+          </AuthForm>
+          <div className="mt-16 text-center">
+            <p className="text-base text-gray-600">
+              Already have an account?{" "}
+              <Link href="/login" className="text-blue-600 hover:text-blue-500 font-medium">
+                Sign in
+              </Link>
+            </p>
+          </div>
         </CardContent>
-      </Card>
+      </div>
       {/* Floating Modal Prompt */}
       {showSuccess && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
