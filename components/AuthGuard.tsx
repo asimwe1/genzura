@@ -5,6 +5,33 @@ import { AppSidebar } from "@/components/sidebar";
 import { ProductSidebar } from "@/components/product-sidebar";
 import { ServiceSidebar } from "@/components/service-sidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { ResponsiveNav } from "@/components/responsive-nav";
+import { Package, Wrench, Home, Building2, FileText, Truck, Users, Wallet, MoreHorizontal, Settings, Bot } from "lucide-react";
+
+// Menu items for each portal
+const productMenuItems = [
+  { title: "Dashboard", url: "/product", icon: Home },
+  { title: "Products", url: "/product/products", icon: Package },
+  { title: "Suppliers", url: "/product/suppliers", icon: Truck },
+  { title: "Reports", url: "/product/reports", icon: FileText },
+  { title: "Manage Store", url: "/product/manage-store", icon: Building2 },
+  { title: "Departments", url: "/product/departments", icon: Users },
+  { title: "Payroll", url: "/product/payroll", icon: Wallet },
+  { title: "System Utils", url: "/product/others", icon: MoreHorizontal },
+  { title: "Settings", url: "/product/settings", icon: Settings },
+  { title: "AI Chat", url: "/product/ai-chat", icon: Bot },
+];
+
+const serviceMenuItems = [
+  { title: "Dashboard", url: "/service", icon: Home },
+  { title: "Services", url: "/service/services", icon: Wrench },
+  { title: "Reports", url: "/service/reports", icon: FileText },
+  { title: "Departments", url: "/service/departments", icon: Users },
+  { title: "Payroll", url: "/service/payroll", icon: Wallet },
+  { title: "System Utils", url: "/service/others", icon: MoreHorizontal },
+  { title: "Settings", url: "/service/settings", icon: Settings },
+  { title: "AI Chat", url: "/service/ai-chat", icon: Bot },
+];
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -83,17 +110,46 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   if (checked && isAuth && !isPublicRoute) {
     const isProductPortal = pathname.startsWith("/product") || (pathname === "/" && userPortal === "product");
     const isServicePortal = pathname.startsWith("/service") || (pathname === "/" && userPortal === "service");
+    
     let SidebarComponent = AppSidebar; // Default fallback
+    let mobileNavProps = null;
+    
     if (isProductPortal) {
       SidebarComponent = ProductSidebar;
+      mobileNavProps = {
+        title: "Product Portal",
+        icon: Package,
+        iconBgColor: "bg-blue-600",
+        menuItems: productMenuItems
+      };
     } else if (isServicePortal) {
       SidebarComponent = ServiceSidebar;
+      mobileNavProps = {
+        title: "Service Portal", 
+        icon: Wrench,
+        iconBgColor: "bg-green-600",
+        menuItems: serviceMenuItems
+      };
     }
+    
     return (
-      <SidebarProvider>
-        <SidebarComponent />
-        <SidebarInset>{children}</SidebarInset>
-      </SidebarProvider>
+      <>
+        {/* Mobile Navigation - Always visible on mobile */}
+        {mobileNavProps && (
+          <ResponsiveNav 
+            title={mobileNavProps.title}
+            icon={mobileNavProps.icon}
+            iconBgColor={mobileNavProps.iconBgColor}
+            menuItems={mobileNavProps.menuItems}
+          />
+        )}
+        
+        {/* Desktop Layout */}
+        <SidebarProvider>
+          <SidebarComponent />
+          <SidebarInset className="md:ml-0">{children}</SidebarInset>
+        </SidebarProvider>
+      </>
     );
   }
 
