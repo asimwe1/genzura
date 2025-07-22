@@ -19,12 +19,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import DashboardHeader from "@/components/ui/DashboardHeader";
 
 export default function ProductPageClient() {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [metricsLoading, setMetricsLoading] = useState(true);
-  const [businessCategory, setBusinessCategory] = useState("coffee");
+  const [businessCategory, setBusinessCategory] = useState("inventory");
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [metricsData, setMetricsData] = useState([
     { date: "Jul 1", value: 120 },
@@ -60,7 +61,7 @@ export default function ProductPageClient() {
     sku: ""
   });
 
-  const defaultCategories = ["coffee", "retail", "manufacturing", "agriculture"];
+  const defaultCategories = ["inventory", "retail", "manufacturing", "agriculture"];
   const isCustomCategory = !defaultCategories.includes(businessCategory);
   const [editingCategory, setEditingCategory] = useState(false);
   const [customCategory, setCustomCategory] = useState(isCustomCategory ? businessCategory : "");
@@ -73,6 +74,9 @@ export default function ProductPageClient() {
     }
   };
 
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [username, setUsername] = useState<string>("User");
+
   useEffect(() => {
     setMetricsLoading(true);
     const timer = setTimeout(() => setMetricsLoading(false), 1200);
@@ -80,8 +84,12 @@ export default function ProductPageClient() {
   }, []);
 
   useEffect(() => {
-    const category = localStorage.getItem("businessCategory") || "coffee";
+    const category = localStorage.getItem("businessCategory") || "inventory";
     setBusinessCategory(category);
+    // Username logic
+    const orgName = localStorage.getItem("organizationName");
+    const userEmail = localStorage.getItem("userEmail");
+    setUsername(orgName || userEmail || "User");
   }, []);
 
   const handleLogout = () => {
@@ -129,58 +137,12 @@ export default function ProductPageClient() {
     <AuthGuard>
       <TooltipProvider>
         <div className="flex-1 space-y-3 py-2 pr-4 md:pr-8 lg:pr-12 xl:pr-16">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4 flex-1 max-w-md">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input placeholder="Search products..." className="pl-10 bg-gray-50 border-gray-200" aria-label="Search products" />
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative" aria-label="View notifications" tabIndex={0}>
-                    <Bell className="h-5 w-5" />
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-blue-600">
-                      3
-                    </Badge>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>View notifications</TooltipContent>
-              </Tooltip>
-              <div className="flex items-center space-x-2">
-                <Avatar>
-                  <AvatarImage src="/placeholder.svg?height=32&width=32" />
-                  <AvatarFallback>RU</AvatarFallback>
-                </Avatar>
-                <span className="font-medium">Username</span>
-              </div>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark") } aria-label="Toggle theme" tabIndex={0}>
-                    <Moon className="h-5 w-5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Toggle light/dark mode</TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={handleLogout}
-                    className="bg-red-100 hover:bg-red-200 rounded-full p-2 border border-red-300 shadow-md"
-                    aria-label="Logout"
-                    tabIndex={0}
-                  >
-                    <LogOut className="h-7 w-7 text-red-600" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Logout</TooltipContent>
-              </Tooltip>
-            </div>
-          </div>
+          <DashboardHeader
+            username={username}
+            avatarUrl={"/placeholder.svg?height=32&width=32"}
+            theme={theme}
+            setTheme={setTheme}
+          />
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Main Content */}
             <div className="lg:col-span-3 space-y-6">
@@ -595,6 +557,20 @@ export default function ProductPageClient() {
           </div>
         </div>
       </TooltipProvider>
+      <Dialog open={showLogoutModal} onOpenChange={setShowLogoutModal}>
+        <DialogContent className="max-w-sm mx-auto">
+          <DialogHeader>
+            <DialogTitle>Are you sure you want to log out?</DialogTitle>
+            <DialogDescription>
+              You will be logged out of your account. Do you want to continue?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 mt-4">
+            <Button className="bg-red-600 hover:bg-red-700 text-white" onClick={handleLogout}>Yes, log out</Button>
+            <Button variant="outline" onClick={() => setShowLogoutModal(false)}>Cancel</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       <Toaster />
     </AuthGuard>
   );
