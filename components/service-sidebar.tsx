@@ -1,6 +1,6 @@
 "use client"
 
-import { Building2, FileText, Home, Settings, Users, Wallet, MoreHorizontal, Bot, Crown } from "lucide-react"
+import { Building2, FileText, Home, Settings, Users, Wallet, MoreHorizontal, Bot, Crown, Wrench } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import React, { useState } from "react"
@@ -29,7 +29,7 @@ const menuItems = [
   {
     title: "Services",
     url: "/service/services",
-    icon: Settings,
+    icon: Wrench,
   },
   {
     title: "Reports",
@@ -68,14 +68,15 @@ export function ServiceSidebar() {
   const [showUpgrade, setShowUpgrade] = useState(false)
 
   return (
-    <>
-    <Sidebar className="border-r w-[200px]">
+    <>    
+    {/* Desktop Sidebar - Hidden on mobile */}
+    <Sidebar className="border-r hidden md:flex">
       <SidebarHeader className="p-3">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-600">
-            <Settings className="h-4 w-4 text-white" />
+            <Wrench className="h-4 w-4 text-white" />
           </div>
-          <span className="text-xl font-bold">Service Portal</span>
+          <span className="text-lg sm:text-xl font-bold">Service Portal</span>
         </div>
       </SidebarHeader>
 
@@ -85,10 +86,10 @@ export function ServiceSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={pathname === item.url} className="w-full h-[2.5rem] justify-start">
+                  <SidebarMenuButton asChild isActive={pathname === item.url} className="w-full h-[2.5rem] justify-start text-sm sm:text-base">
                     <Link href={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      <span className="truncate">{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -147,4 +148,4 @@ export function ServiceSidebar() {
     </Dialog>
     </>
   )
-} 
+}

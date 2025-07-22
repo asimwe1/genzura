@@ -78,14 +78,15 @@ export function ProductSidebar() {
   const [showUpgrade, setShowUpgrade] = useState(false)
 
   return (
-    <>
-    <Sidebar className="border-r w-[200px]">
+    <>    
+    {/* Desktop Sidebar - Hidden on mobile */}
+    <Sidebar className="border-r hidden md:flex">
       <SidebarHeader className="p-3">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
             <Package className="h-4 w-4 text-white" />
           </div>
-          <span className="text-xl font-bold">Product Portal</span>
+          <span className="text-lg sm:text-xl font-bold">Product Portal</span>
         </div>
       </SidebarHeader>
 
@@ -95,10 +96,10 @@ export function ProductSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={pathname === item.url} className="w-full h-[2.5rem] justify-start">
+                  <SidebarMenuButton asChild isActive={pathname === item.url} className="w-full h-[2.5rem] justify-start text-sm sm:text-base">
                     <Link href={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+                      <item.icon className="h-4 w-4 flex-shrink-0" />
+                      <span className="truncate">{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
