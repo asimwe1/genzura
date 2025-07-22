@@ -48,6 +48,7 @@ export default function ServicePortal() {
   ])
 
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isAuth, setIsAuth] = useState(false);
 
   useEffect(() => {
     setMetricsLoading(true)
@@ -62,6 +63,7 @@ export default function ServicePortal() {
     const orgName = localStorage.getItem("organizationName")
     const userEmail = localStorage.getItem("userEmail")
     setUsername(orgName || userEmail || "User")
+    setIsAuth(localStorage.getItem("isAuth") === "true")
   }, [])
   
   const handleLogout = () => {
@@ -131,9 +133,11 @@ export default function ServicePortal() {
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark") } aria-label="Toggle theme" tabIndex={0}>
-                  <Moon className="h-5 w-5" />
-                </Button>
+                {isAuth && (
+                  <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark") } aria-label="Toggle theme" tabIndex={0}>
+                    <Moon className="h-5 w-5" />
+                  </Button>
+                )}
               </TooltipTrigger>
               <TooltipContent>Toggle light/dark mode</TooltipContent>
             </Tooltip>
