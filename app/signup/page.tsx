@@ -176,7 +176,11 @@ export default function SignupPage() {
                   {categories.map((category) => (
                     <SelectItem key={category.value} value={category.value}>
                       <div className="flex items-center space-x-2">
-                        <category.icon className="h-4 w-4" />
+                        {typeof category.icon === 'function' ? (
+                          <category.icon className="h-4 w-4" />
+                        ) : (
+                          <span className="h-4 w-4 inline-block" />
+                        )}
                         <span>{category.label}</span>
                       </div>
                     </SelectItem>
