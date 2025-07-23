@@ -37,8 +37,8 @@ export default function BaseSidebar({
 }) {
   const pathname = typeof window !== "undefined" ? window.location.pathname : "";
   return (
-    <Sidebar className={"border-r w-[200px] bg-sidebar text-sidebar-foreground dark:bg-sidebar dark:text-sidebar-foreground " + (className || "") }>
-      <SidebarHeader className="p-3 border-b border-sidebar-border dark:border-sidebar-border bg-sidebar dark:bg-sidebar">
+    <Sidebar className={"w-[200px] bg-background text-sidebar-foreground dark:bg-background dark:text-sidebar-foreground p-1 " + (className || "") }>
+      <SidebarHeader className="border-b border-sidebar-border dark:border-sidebar-border bg-background dark:bg-background p-1">
         <div className="flex items-center gap-2">
           {headerIcon}
           <span className="text-xl font-bold">{headerTitle}</span>
@@ -62,7 +62,7 @@ export default function BaseSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      {footer && <SidebarFooter className="p-4">{footer}</SidebarFooter>}
+      {footer && <SidebarFooter className="p-1">{footer}</SidebarFooter>}
     </Sidebar>
   );
 } 
