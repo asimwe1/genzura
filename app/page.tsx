@@ -8,7 +8,7 @@ export default function HomePage() {
 
   useEffect(() => {
     // Redirect to login page
-    router.replace("/login")
+    router.replace("/product")
   }, [router])
 
   return (
