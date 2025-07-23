@@ -88,12 +88,12 @@ export default function ProductPortalProducts() {
   );
 
   return (
-    <div className="flex-1 space-y-6 pr-6 pt-3">
+    <div className="flex-1 space-y-6 p-6 ">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Product Inventory Management</h1>
-          <p className="text-gray-600">Manage your product inventory and stock levels</p>
+          <h1 className="text-3xl font-bold">Product Management</h1>
+          <p className="text-gray-600">Manage your product and stock levels</p>
         </div>
         <Button className="bg-blue-600 hover:bg-blue-700">
           <Plus className="h-4 w-4 mr-2" />

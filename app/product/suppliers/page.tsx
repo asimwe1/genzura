@@ -138,7 +138,7 @@ export default function SuppliersPage() {
   )
 
   return (
-    <div className="flex-1 space-y-3 py-2 pr-4 md:pr-8 lg:pr-12 xl:pr-16">
+    <div className="flex-1 space-y-3 py-4 pr-4 md:pr-8 lg:pr-6 xl:pr-8 xl:pl-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

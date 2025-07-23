@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, Search, Moon, ChevronDown, Plus, LogOut, Package, Truck, FileText, Bot, Settings, Users, Wallet, MoreHorizontal } from "lucide-react"
+import { Bell, Search, Moon, ChevronDown, Plus, LogOut, Package, Truck, FileText, Bot, Settings, Users, Wallet, MoreHorizontal, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -111,78 +111,112 @@ export default function ProductPortal() {
 
   return (
     <TooltipProvider>
-      <div className="flex-1 space-y-3 py-2 pr-4 md:pr-8 lg:pr-12 xl:pr-16">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4 flex-1 max-w-md">
-            <div className="relative flex-1">
+      <div className="flex-1 space-y-3 p-2 sm:p-4 md:pr-4 lg:pr-6 xl:pr-8 md:pt-4 pt-2">
+        {/* Header - Responsive */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          {/* Search Bar */}
+          <div className="w-full sm:w-auto sm:max-w-md sm:flex-1">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input placeholder="Search products..." className="pl-10 bg-gray-50 border-gray-200" aria-label="Search products" />
+              <Input placeholder="Search products..." className="pl-10 bg-gray-50 border-gray-200 w-full" aria-label="Search products" />
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative" aria-label="View notifications" tabIndex={0}>
-                  <Bell className="h-5 w-5" />
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-blue-600">
-                    3
-                  </Badge>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>View notifications</TooltipContent>
-            </Tooltip>
-
-            <div className="flex items-center space-x-2">
-              <Avatar>
+          {/* Action Items */}
+          <div className="flex items-center justify-between w-full sm:w-auto sm:space-x-2 lg:space-x-4">
+            {/* User Info - Hidden on small mobile, shown on tablet+ */}
+            <div className="hidden sm:flex items-center space-x-2">
+              <Avatar className="h-8 w-8">
                 <AvatarImage src="/placeholder.svg?height=32&width=32" />
                 <AvatarFallback>RU</AvatarFallback>
               </Avatar>
-              <span className="font-medium">Product Portal</span>
+              <span className="font-medium text-sm lg:text-base">Product Portal</span>
             </div>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark") } aria-label="Toggle theme" tabIndex={0}>
-                  <Moon className="h-5 w-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Toggle light/dark mode</TooltipContent>
-            </Tooltip>
+            {/* Action Buttons */}
+            <div className="flex items-center space-x-1 sm:space-x-2">
+              {/* Notifications */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative h-9 w-9 sm:h-10 sm:w-10" aria-label="View notifications" tabIndex={0}>
+                    <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <Badge className="absolute -top-1 -right-1 h-4 w-4 sm:h-5 sm:w-5 rounded-full p-0 flex items-center justify-center bg-blue-600 text-xs">
+                      3
+                    </Badge>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>View notifications</TooltipContent>
+              </Tooltip>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={handleLogout}
-                  className="bg-red-100 hover:bg-red-200 rounded-full p-2 border border-red-300 shadow-md"
-                  aria-label="Logout"
-                  tabIndex={0}
-                >
-                  <LogOut className="h-7 w-7 text-red-600" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Logout</TooltipContent>
-            </Tooltip>
+              {/* Theme Toggle */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark") } aria-label="Toggle theme" tabIndex={0} className="h-9 w-9 sm:h-10 sm:w-10">
+                    <Moon className="h-4 w-4 sm:h-5 sm:w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Toggle light/dark mode</TooltipContent>
+              </Tooltip>
+
+              {/* Mobile User Avatar - Only on mobile */}
+              <div className="sm:hidden">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="User menu">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage src="/placeholder.svg?height=24&width=24" />
+                        <AvatarFallback className="text-xs">RU</AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem disabled>
+                      <span className="font-medium">Product Portal</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout} className="text-red-600">
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              {/* Desktop Logout - Hidden on mobile */}
+              <div className="hidden sm:block">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={handleLogout}
+                      className="bg-red-100 hover:bg-red-200 rounded-full p-2 border border-red-300 shadow-md h-9 w-9 sm:h-10 sm:w-10"
+                      aria-label="Logout"
+                      tabIndex={0}
+                    >
+                      <LogOut className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Logout</TooltipContent>
+                </Tooltip>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 sm:gap-6">
           {/* Main Content */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="xl:col-span-3 space-y-4 sm:space-y-6">
             {/* Welcome Banner */}
             <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h1 className="text-2xl font-bold mb-2">Welcome to Product Portal!</h1>
-                    <p className="text-blue-100 mb-4">Manage your inventory, suppliers, and product catalog</p>
-                    <div className="flex space-x-3">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex-1">
+                    <h1 className="text-xl sm:text-2xl font-bold mb-2">Welcome to Product Portal!</h1>
+                    <p className="text-blue-100 mb-4 text-sm sm:text-base">Manage your inventory, suppliers, and product catalog</p>
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                       <Dialog open={showAddProduct} onOpenChange={setShowAddProduct}>
                         <DialogTrigger asChild>
-                          <Button className="bg-white text-blue-600 hover:bg-gray-100">
+                          <Button className="bg-white text-blue-600 hover:bg-gray-100 text-sm sm:text-base">
                             <Plus className="h-4 w-4 mr-2" />
                             Add Product
                           </Button>
@@ -302,16 +336,16 @@ export default function ProductPortal() {
                       </Dialog>
                       <Button
                         variant="outline"
-                        className="border-white text-white hover:bg-white hover:text-blue-600 bg-transparent"
+                        className="border-white text-white hover:bg-white hover:text-blue-600 bg-transparent text-sm sm:text-base"
                         onClick={() => router.push('/product/suppliers')}
                       >
                         Manage Suppliers
                       </Button>
                     </div>
                   </div>
-                  <div className="hidden md:block">
-                    <div className="w-32 h-32 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                      <Package className="w-16 h-16 text-blue-300" />
+                  <div className="hidden lg:block">
+                    <div className="w-24 h-24 sm:w-32 sm:h-32 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                      <Package className="w-12 h-12 sm:w-16 sm:h-16 text-blue-300" />
                     </div>
                   </div>
                 </div>
@@ -319,7 +353,7 @@ export default function ProductPortal() {
             </Card>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
