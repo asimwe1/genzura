@@ -24,6 +24,42 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 export default function ProductPortalProducts() {
   const [searchTerm, setSearchTerm] = useState("");
 
+  // Stats data for dynamic rendering
+  const statsData = [
+    {
+      title: "Total Products",
+      value: "1,234",
+      icon: Package,
+      bgColor: "bg-blue-100",
+      iconColor: "text-blue-600",
+      textColor: "text-gray-600"
+    },
+    {
+      title: "Low Stock",
+      value: "23",
+      icon: AlertTriangle,
+      bgColor: "bg-yellow-100",
+      iconColor: "text-yellow-600",
+      textColor: "text-yellow-600"
+    },
+    {
+      title: "Out of Stock",
+      value: "5",
+      icon: XCircle,
+      bgColor: "bg-red-100",
+      iconColor: "text-red-600",
+      textColor: "text-red-600"
+    },
+    {
+      title: "Total Value",
+      value: "$45,678",
+      icon: DollarSign,
+      bgColor: "bg-green-100",
+      iconColor: "text-green-600",
+      textColor: "text-gray-600"
+    }
+  ];
+
   const inventoryItems = [
     {
       id: "INV001",
@@ -102,84 +138,44 @@ export default function ProductPortalProducts() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Products</p>
-                <p className="text-2xl font-bold">1,234</p>
+      <div className="grid grid-cols-1 w-[21.5rem] lg:w-full md:grid-cols-4 gap-6">
+        {statsData.map((stat, index) => (
+          <Card key={index}>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className={`text-sm font-medium ${stat.textColor}`}>{stat.title}</p>
+                  <p className={`text-2xl font-bold ${stat.textColor === 'text-gray-600' ? '' : stat.textColor}`}>{stat.value}</p>
+                </div>
+                <div className={`h-12 w-12 ${stat.bgColor} rounded-lg flex items-center justify-center`}>
+                  <stat.icon className={`h-6 w-6 ${stat.iconColor}`} />
+                </div>
               </div>
-              <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Package className="h-6 w-6 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Low Stock</p>
-                <p className="text-2xl font-bold text-yellow-600">23</p>
-              </div>
-              <div className="h-12 w-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <AlertTriangle className="h-6 w-6 text-yellow-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Out of Stock</p>
-                <p className="text-2xl font-bold text-red-600">5</p>
-              </div>
-              <div className="h-12 w-12 bg-red-100 rounded-lg flex items-center justify-center">
-                <XCircle className="h-6 w-6 text-red-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Value</p>
-                <p className="text-2xl font-bold">$45,678</p>
-              </div>
-              <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <DollarSign className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Filters and Search */}
       <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between space-x-4">
-            <div className="flex items-center space-x-4 flex-1">
-              <div className="relative flex-1 max-w-md">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-0 sm:justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full sm:flex-1">
+              <div className="relative w-full sm:flex-1 sm:max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
                   placeholder="Search products..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 w-full"
                 />
               </div>
-              <Button variant="outline">
+              <Button variant="outline" className="w-full sm:w-auto">
                 <Filter className="h-4 w-4 mr-2" />
                 Filter
               </Button>
             </div>
-            <Button variant="outline">
+            <Button variant="outline" className="w-full sm:w-auto">
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
