@@ -19,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import BaseSidebar from "@/components/ui/BaseSidebar";
 
 const menuItems = [
   {
@@ -74,9 +75,8 @@ const menuItems = [
 ]
 
 export function ProductSidebar() {
-  const pathname = usePathname()
-  const [showUpgrade, setShowUpgrade] = useState(false)
-
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const pathname = usePathname();
   return (
     <>    
     {/* Desktop Sidebar - Hidden on mobile */}
@@ -114,11 +114,9 @@ export function ProductSidebar() {
           <CardContent className="p-4 text-center">
             <div className="mb-3">
                 <Crown className="h-8 w-8 mx-auto text-blue-500" />
-            </div>
+              </div>
               <h3 className="font-semibold text-sm mb-1 text-blue-800">Upgrade to Premium with AI analysis</h3>
-            <p className="text-xs text-blue-700 mb-3">
-                Unlock advanced analytics, AI-powered insights, and premium support for your product operations.
-            </p>
+              <p className="text-xs text-blue-700 mb-3"></p>
               <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white" onClick={() => setShowUpgrade(true)}>
                 Upgrade Now
               </Button>

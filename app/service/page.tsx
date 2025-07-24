@@ -1,6 +1,7 @@
 "use client"
 
-import { Bell, Search, Moon, ChevronDown, Plus, LogOut, Settings, FileText, Bot, Users, Wallet, MoreHorizontal, Building2, Menu } from "lucide-react"
+import React from "react"
+import { Bell, Search, Moon, ChevronDown, Plus, LogOut, Settings, FileText, Bot, Users, Wallet, MoreHorizontal, Building2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,12 +13,17 @@ import { useTheme } from "next-themes"
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, CartesianGrid, BarChart, Bar, PieChart, Pie, Cell } from "recharts"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useState, useEffect } from "react"
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import DashboardHeader from "@/components/ui/DashboardHeader";
+
 
 export default function ServicePortal() {
   const router = useRouter()
   const { theme, setTheme } = useTheme()
   const [metricsLoading, setMetricsLoading] = useState(true)
+  const [businessCategory, setBusinessCategory] = useState("garage")
+  const [username, setUsername] = useState<string>("User")
   const [metricsData, setMetricsData] = useState([
     { date: "Jul 1", value: 85 },
     { date: "Jul 2", value: 92 },
@@ -42,10 +48,23 @@ export default function ServicePortal() {
     { name: "System Implementation", status: "In Progress", revenue: "$5,000" },
   ])
 
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isAuth, setIsAuth] = useState(false);
+
   useEffect(() => {
     setMetricsLoading(true)
     const timer = setTimeout(() => setMetricsLoading(false), 1200)
     return () => clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    const category = localStorage.getItem("businessCategory") || "garage"
+    setBusinessCategory(category)
+    // Username logic
+    const orgName = localStorage.getItem("organizationName")
+    const userEmail = localStorage.getItem("userEmail")
+    setUsername(orgName || userEmail || "User")
+    setIsAuth(localStorage.getItem("isAuth") === "true")
   }, [])
   
   const handleLogout = () => {
@@ -68,127 +87,55 @@ export default function ServicePortal() {
     { name: "David", avatar: "/placeholder.svg?height=32&width=32" },
   ]
 
+  const defaultCategories = ["garage", "consulting", "healthcare", "education"];
+  const isCustomCategory = !defaultCategories.includes(businessCategory);
+  const [editingCategory, setEditingCategory] = useState(false);
+  const [customCategory, setCustomCategory] = useState(isCustomCategory ? businessCategory : "");
+
+  const handleCustomCategorySave = () => {
+    if (customCategory.trim()) {
+      setBusinessCategory(customCategory.trim());
+      localStorage.setItem("businessCategory", customCategory.trim());
+      setEditingCategory(false);
+    }
+  };
+
   return (
-    <TooltipProvider>
-      <div className="flex-1 space-y-3 p-2 sm:p-4 md:pr-8 lg:pr-12 xl:pr-8 xl:pl-8 md:pt-4 pt-2">
-        {/* Header - Responsive */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          {/* Search Bar */}
-          <div className="w-full sm:w-auto sm:max-w-md sm:flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input placeholder="Search services..." className="pl-10 bg-gray-50 border-gray-200 w-full" aria-label="Search services" />
-            </div>
-          </div>
-
-          {/* Action Items */}
-          <div className="flex items-center justify-between w-full sm:w-auto sm:space-x-2 lg:space-x-4">
-            {/* User Info - Hidden on small mobile, shown on tablet+ */}
-            <div className="hidden sm:flex items-center space-x-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src="/placeholder.svg?height=32&width=32" />
-                <AvatarFallback>RU</AvatarFallback>
-              </Avatar>
-              <span className="font-medium text-sm lg:text-base">Service Portal</span>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex items-center space-x-1 sm:space-x-2">
-              {/* Notifications */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative h-9 w-9 sm:h-10 sm:w-10" aria-label="View notifications" tabIndex={0}>
-                    <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
-                    <Badge className="absolute -top-1 -right-1 h-4 w-4 sm:h-5 sm:w-5 rounded-full p-0 flex items-center justify-center bg-blue-600 text-xs">
-                      5
-                    </Badge>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>View notifications</TooltipContent>
-              </Tooltip>
-
-              {/* Theme Toggle */}
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark") } aria-label="Toggle theme" tabIndex={0} className="h-9 w-9 sm:h-10 sm:w-10">
-                    <Moon className="h-4 w-4 sm:h-5 sm:w-5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Toggle light/dark mode</TooltipContent>
-              </Tooltip>
-
-              {/* Mobile User Avatar - Only on mobile */}
-              <div className="sm:hidden">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="User menu">
-                      <Avatar className="h-6 w-6">
-                        <AvatarImage src="/placeholder.svg?height=24&width=24" />
-                        <AvatarFallback className="text-xs">RU</AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem disabled>
-                      <span className="font-medium">Service Portal</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleLogout} className="text-red-600">
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Logout
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-
-              {/* Desktop Logout - Hidden on mobile */}
-              <div className="hidden sm:block">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={handleLogout}
-                      className="bg-red-100 hover:bg-red-200 rounded-full p-2 border border-red-300 shadow-md h-9 w-9 sm:h-10 sm:w-10"
-                      aria-label="Logout"
-                      tabIndex={0}
-                    >
-                      <LogOut className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Logout</TooltipContent>
-                </Tooltip>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div className="flex-1 space-y-3 py-2 pr-4 md:pr-8 lg:pr-12 xl:pr-16">
+      <DashboardHeader
+        username={username}
+        avatarUrl={"/placeholder.svg?height=32&width=32"}
+        theme={theme}
+        setTheme={setTheme}
+      />
 
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 sm:gap-6">
           {/* Main Content */}
           <div className="xl:col-span-3 space-y-4 sm:space-y-6">
             {/* Welcome Banner */}
-            <Card className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white">
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="flex-1">
-                    <h1 className="text-xl sm:text-2xl font-bold mb-2">Welcome to Service Portal!</h1>
-                    <p className="text-blue-100 mb-4 text-sm sm:text-base">Manage your services, clients, and operations</p>
-                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                      <Button className="bg-white text-blue-600 hover:bg-gray-100 text-sm sm:text-base">
+            <Card className="bg-gradient-to-r from-green-600 to-teal-600 text-white">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="text-2xl font-bold mb-2">Welcome to Service Portal!</h1>
+                    <p className="text-green-100 mb-4">Manage your services, clients, and operations</p>
+                    <div className="flex space-x-3">
+                      <Button className="bg-white text-green-600 hover:bg-gray-100">
                         <Plus className="h-4 w-4 mr-2" />
                         Add Service
                       </Button>
                       <Button
                         variant="outline"
-                        className="border-white text-white hover:bg-white hover:text-blue-600 bg-transparent text-sm sm:text-base"
+                        className="border-white text-white hover:bg-white hover:text-green-600 bg-transparent"
                         onClick={() => router.push('/service/reports')}
                       >
                         View Reports
                       </Button>
                     </div>
                   </div>
-                  <div className="hidden lg:block">
-                    <div className="w-24 h-24 sm:w-32 sm:h-32 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                      <Settings className="w-12 h-12 sm:w-16 sm:h-16 text-blue-300" />
+                  <div className="hidden md:block">
+                    <div className="w-32 h-32 bg-green-500/20 rounded-lg flex items-center justify-center">
+                      <Settings className="w-16 h-16 text-green-300" />
                     </div>
                   </div>
                 </div>
@@ -447,7 +394,20 @@ export default function ServicePortal() {
             </Card>
           </div>
         </div>
-      </div>
-    </TooltipProvider>
+        <Dialog open={showLogoutModal} onOpenChange={setShowLogoutModal}>
+          <DialogContent className="max-w-sm mx-auto">
+            <DialogHeader>
+              <DialogTitle>Are you sure you want to log out?</DialogTitle>
+              <DialogDescription>
+                You will be logged out of your account. Do you want to continue?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col gap-3 mt-4">
+              <Button className="bg-red-600 hover:bg-red-700 text-white" onClick={handleLogout}>Yes, log out</Button>
+              <Button variant="outline" onClick={() => setShowLogoutModal(false)}>Cancel</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+    </div>
   )
 } 

@@ -1,7 +1,7 @@
 // Copy of main settings page for service portal
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { User, Bell, Shield, Database, Palette, Save, Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
