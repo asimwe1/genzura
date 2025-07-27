@@ -27,6 +27,7 @@ yarn-error.log*
 
 # vercel
 .vercel
+.DS_Store
 
 # typescript
 *.tsbuildinfo
