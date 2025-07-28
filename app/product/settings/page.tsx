@@ -103,18 +103,33 @@ export default function ProductSettings() {
           <p className="text-gray-600">Manage your product portal account and preferences</p>
         </div>
         <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleSaveAll}>
-          <Save className="h-4 w-4 mr-2" />
-          Save All Changes
+          <Save className="h-4 w-4" />
+          <span className="hidden sm:inline">Save All Changes</span>
         </Button>
       </div>
 
       <Tabs defaultValue="profile" className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
-          <TabsTrigger value="preferences">Preferences</TabsTrigger>
-          <TabsTrigger value="system">System</TabsTrigger>
+          <TabsTrigger value="profile" className="flex items-center gap-2">
+            <User className="h-4 w-4" />
+            <span className="hidden sm:inline">Profile</span>
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="flex items-center gap-2">
+            <Bell className="h-4 w-4" />
+            <span className="hidden sm:inline">Notifications</span>
+          </TabsTrigger>
+          <TabsTrigger value="security" className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            <span className="hidden sm:inline">Security</span>
+          </TabsTrigger>
+          <TabsTrigger value="preferences" className="flex items-center gap-2">
+            <Palette className="h-4 w-4" />
+            <span className="hidden sm:inline">Preferences</span>
+          </TabsTrigger>
+          <TabsTrigger value="system" className="flex items-center gap-2">
+            <Database className="h-4 w-4" />
+            <span className="hidden sm:inline">System</span>
+          </TabsTrigger>
         </TabsList>
 
         {/* Profile Settings */}
@@ -489,7 +504,7 @@ export default function ProductSettings() {
 
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Maintenance</h3>
-                <div className="flex space-x-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <Button variant="outline" onClick={() => handleMaintenance("Clear Cache")}>Clear Cache</Button>
                   <Button variant="outline" onClick={() => handleMaintenance("Optimize Database")}>Optimize Database</Button>
                   <Button variant="outline" onClick={() => handleMaintenance("Check Updates")}>Check Updates</Button>
