@@ -50,8 +50,8 @@ export default function ManageStore() {
           <p className="text-gray-600">Configure your store settings and information</p>
         </div>
         <Button className="bg-blue-600 hover:bg-blue-700">
-          <Save className="h-4 w-4 mr-2" />
-          Save Changes
+          <Save className="h-4 w-4" />
+          <span className=" sr-only">Save Changes</span>
         </Button>
       </div>
 

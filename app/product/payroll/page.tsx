@@ -140,7 +140,7 @@ export default function Payroll() {
   const handleDownload = () => toast.success("Payslip downloaded (placeholder)")
 
   return (
-    <div className="flex-1 space-y-6 p-6">
+    <div className="flex-1 md:w-[64.5rem] space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

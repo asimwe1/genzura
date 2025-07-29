@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Package, XCircle, AlertTriangle, DollarSign, TrendingUp, Search, Filter, Edit, Trash2, Eye, ShoppingCart, Tag, Calendar, Download } from "lucide-react"
+import { Plus, Package, XCircle, AlertTriangle, DollarSign, TrendingUp, Search, Filter, Edit, Trash2, Eye, ShoppingCart, Tag, Calendar, Download, X } from "lucide-react"
 import { toast } from "sonner"
 
 
@@ -214,29 +214,40 @@ export default function ProductsPage() {
   const lowStockProducts = products.filter(product => product.stock < 20).length
 
   return (
-    <div className="flex-1 space-y-6 pr-6 pt-6">
+    <div className="flex-1 md:w-[64.5rem] space-y-4 p-2 md:p-3 md:pr-6 pt-4 max-w-full">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold">Product Management</h1>
-          <p className="text-gray-600">Manage your product and stock levels</p>
+          <h1 className="text-xl md:text-2xl font-bold">Product Management</h1>
+          <p className="text-sm text-gray-600">Manage your product and stock levels</p>
         </div>
         <Dialog open={showAddProduct} onOpenChange={setShowAddProduct}>
           <DialogTrigger asChild>
-            <Button className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700">
+            <Button className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               Add Product
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Add New Product</DialogTitle>
-              <DialogDescription>
-                Add a new product to your inventory with all necessary details.
-              </DialogDescription>
+          <DialogContent className="w-[95vw] max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div>
+                <DialogTitle>Add New Product</DialogTitle>
+                <DialogDescription>
+                  Add a new product to your inventory with all necessary details.
+                </DialogDescription>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowAddProduct(false)}
+                className="h-8 w-8 p-0 hover:bg-gray-100 dark:hover:bg-gray-800"
+              >
+                <X className="h-4 w-4" />
+              </Button>
             </DialogHeader>
             <form onSubmit={handleAddProduct} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              {/* Name and Category - Stack on mobile, side by side on tablet+ */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="productName">Product Name *</Label>
                   <Input
@@ -262,16 +273,20 @@ export default function ProductsPage() {
                   </Select>
                 </div>
               </div>
+
+              {/* Description - Full width on all screens */}
               <div className="space-y-2">
                 <Label htmlFor="productDescription">Description</Label>
                 <Textarea
                   id="productDescription"
                   value={productForm.description}
                   onChange={(e) => setProductForm({...productForm, description: e.target.value})}
-                  className="bg-white dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
+                  className="bg-white dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 hover:border-gray-400 dark:hover:border-gray-500 transition-colors min-h-[80px]"
                 />
               </div>
-              <div className="grid grid-cols-3 gap-4">
+
+              {/* Price, Cost, Stock - Stack on mobile, 2 cols on tablet, 3 cols on desktop */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="productPrice">Price (FRW) *</Label>
                   <Input
@@ -293,7 +308,7 @@ export default function ProductsPage() {
                     className="bg-white dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2 sm:col-span-2 lg:col-span-1">
                   <Label htmlFor="productStock">Stock Quantity</Label>
                   <Input
                     id="productStock"
@@ -304,7 +319,9 @@ export default function ProductsPage() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+
+              {/* SKU and Supplier - Stack on mobile, side by side on tablet+ */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="productSku">SKU</Label>
                   <Input
@@ -324,6 +341,8 @@ export default function ProductsPage() {
                   />
                 </div>
               </div>
+
+              {/* Image URL - Full width on all screens */}
               <div className="space-y-2">
                 <Label htmlFor="productImage">Image URL</Label>
                 <Input
@@ -334,7 +353,9 @@ export default function ProductsPage() {
                   className="bg-white dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
                 />
               </div>
-              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700">
+
+              {/* Submit Button - Full width with responsive padding */}
+              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 mt-6 py-2.5">
                 Add Product
               </Button>
             </form>
@@ -343,17 +364,17 @@ export default function ProductsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 w-[21.5rem] lg:w-full md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         {statsData.map((stat, index) => (
           <Card key={index}>
-            <CardContent className="p-6">
+            <CardContent className="p-3 md:p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className={`text-sm font-medium ${stat.textColor}`}>{stat.title}</p>
-                  <p className={`text-2xl font-bold ${stat.textColor === 'text-gray-600' ? '' : stat.textColor}`}>{stat.value}</p>
+                <div className="min-w-0 flex-1">
+                  <p className={`text-xs md:text-sm font-medium ${stat.textColor} truncate`}>{stat.title}</p>
+                  <p className={`text-lg md:text-xl font-bold ${stat.textColor === 'text-gray-600' ? '' : stat.textColor} truncate`}>{stat.value}</p>
                 </div>
-                <div className={`h-12 w-12 ${stat.bgColor} rounded-lg flex items-center justify-center`}>
-                  <stat.icon className={`h-6 w-6 ${stat.iconColor}`} />
+                <div className={`h-8 w-8 md:h-10 md:w-10 ${stat.bgColor} rounded-lg flex items-center justify-center flex-shrink-0 ml-2`}>
+                  <stat.icon className={`h-4 w-4 md:h-5 md:w-5 ${stat.iconColor}`} />
                 </div>
               </div>
             </CardContent>
@@ -363,9 +384,9 @@ export default function ProductsPage() {
 
       {/* Search and Filters */}
       <Card>
-        <CardContent className="p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-0 sm:justify-between">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full sm:flex-1">
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-0 sm:justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:flex-1">
               <div className="relative w-full sm:flex-1 sm:max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                 <Input
@@ -376,7 +397,7 @@ export default function ProductsPage() {
                 />
               </div>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-40 bg-white dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
+                <SelectTrigger className="w-full sm:w-40 bg-white dark:bg-gray-800 text-black dark:text-white border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 hover:border-gray-400 dark:hover:border-gray-500 transition-colors">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -397,68 +418,149 @@ export default function ProductsPage() {
       </Card>
 
       {/* Products Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Product Inventory</CardTitle>
+      <Card className="w-full overflow-hidden">
+        <CardHeader className="p-4">
+          <CardTitle className="text-lg">Product Inventory</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>SKU</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Stock</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Supplier</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredProducts.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>
-                    <div className="flex items-center space-x-3">
-                      <div className="h-10 w-10 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+        <CardContent className="p-0 w-full">
+          {/* Mobile Card View */}
+          <div className="block md:hidden space-y-3 p-4">
+            {filteredProducts.map((product) => (
+              <Card key={product.id} className="shadow-sm">
+                <CardContent className="p-3">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center space-x-3 flex-1 min-w-0">
+                      <div className="h-10 w-10 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
                         <Package className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                       </div>
-                      <div>
-                        <p className="font-medium">{product.name}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{product.description}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{product.name}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{product.description}</p>
                       </div>
                     </div>
-                  </TableCell>
-                  <TableCell>{product.category}</TableCell>
-                  <TableCell>{product.sku}</TableCell>
-                  <TableCell>FRW {product.price.toLocaleString()}</TableCell>
-                  <TableCell>{product.stock}</TableCell>
-                  <TableCell>{getStatusBadge(product.status)}</TableCell>
-                  <TableCell>{product.supplier}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1 ml-2 flex-shrink-0">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => openEditDialog(product)}
-                        className="h-8 w-8 p-0 hover:bg-blue-100 dark:hover:bg-blue-900"
+                        className="h-7 w-7 p-0 hover:bg-blue-100 dark:hover:bg-blue-900"
                       >
-                        <Edit className="h-4 w-4" />
+                        <Edit className="h-3 w-3" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDeleteProduct(product.id)}
-                        className="h-8 w-8 p-0 hover:bg-red-100 dark:hover:bg-red-900"
+                        className="h-7 w-7 p-0 hover:bg-red-100 dark:hover:bg-red-900"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="min-w-0">
+                      <span className="text-gray-500 dark:text-gray-400 block text-xs">Category</span>
+                      <span className="font-medium text-xs truncate block">{product.category}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-gray-500 dark:text-gray-400 block text-xs">SKU</span>
+                      <span className="font-medium text-xs truncate block">{product.sku}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-gray-500 dark:text-gray-400 block text-xs">Price</span>
+                      <span className="font-medium text-xs truncate block">FRW {product.price.toLocaleString()}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-gray-500 dark:text-gray-400 block text-xs">Stock</span>
+                      <span className="font-medium text-xs">{product.stock}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-gray-500 dark:text-gray-400 block text-xs">Status</span>
+                      <div className="mt-1">
+                        {getStatusBadge(product.status)}
+                      </div>
+                    </div>
+                    <div className="min-w-0">
+                      <span className="text-gray-500 dark:text-gray-400 block text-xs">Supplier</span>
+                      <span className="font-medium text-xs truncate block">{product.supplier}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden md:block w-full">
+            <div className="overflow-x-auto w-full">
+              <Table className="w-full">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[35%] min-w-[200px]">Product</TableHead>
+                    <TableHead className="hidden lg:table-cell w-[12%] min-w-[100px]">Category</TableHead>
+                    <TableHead className="hidden xl:table-cell w-[10%] min-w-[80px]">SKU</TableHead>
+                    <TableHead className="w-[15%] min-w-[100px]">Price</TableHead>
+                    <TableHead className="w-[8%] min-w-[60px]">Stock</TableHead>
+                    <TableHead className="w-[10%] min-w-[80px]">Status</TableHead>
+                    <TableHead className="hidden lg:table-cell w-[15%] min-w-[120px]">Supplier</TableHead>
+                    <TableHead className="w-[10%] min-w-[80px]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredProducts.map((product) => (
+                    <TableRow key={product.id}>
+                      <TableCell className="w-[35%] min-w-[200px]">
+                        <div className="flex items-center space-x-2">
+                          <div className="h-8 w-8 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <Package className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm truncate">{product.name}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{product.description}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell text-sm w-[12%] min-w-[100px]">
+                        <span className="truncate block">{product.category}</span>
+                      </TableCell>
+                      <TableCell className="hidden xl:table-cell text-sm w-[10%] min-w-[80px]">
+                        <span className="truncate block">{product.sku}</span>
+                      </TableCell>
+                      <TableCell className="text-sm w-[15%] min-w-[100px]">
+                        <span className="truncate block">FRW {product.price.toLocaleString()}</span>
+                      </TableCell>
+                      <TableCell className="text-sm w-[8%] min-w-[60px]">{product.stock}</TableCell>
+                      <TableCell className="w-[10%] min-w-[80px]">{getStatusBadge(product.status)}</TableCell>
+                      <TableCell className="hidden lg:table-cell text-sm w-[15%] min-w-[120px]">
+                        <span className="truncate block">{product.supplier}</span>
+                      </TableCell>
+                      <TableCell className="w-[10%] min-w-[80px]">
+                        <div className="flex items-center space-x-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openEditDialog(product)}
+                            className="h-7 w-7 p-0 hover:bg-blue-100 dark:hover:bg-blue-900"
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteProduct(product.id)}
+                            className="h-7 w-7 p-0 hover:bg-red-100 dark:hover:bg-red-900"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -578,4 +680,4 @@ export default function ProductsPage() {
       </Dialog>
     </div>
   )
-} 
+}
