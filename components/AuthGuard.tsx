@@ -8,6 +8,11 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { ResponsiveNav } from "@/components/responsive-nav";
 import { Package, Wrench, Home, Building2, FileText, Truck, Users, Wallet, MoreHorizontal, Settings, Bot } from "lucide-react";
 
+
+const isBusinessType = (userType: string) => {
+  return userType === 'business' || userType === 'enterprise' || userType === 'company';
+};
+
 // Menu items for each portal
 const productMenuItems = [
   { title: "Dashboard", url: "/product", icon: Home },
