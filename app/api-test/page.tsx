@@ -14,11 +14,44 @@ export default function ApiTestPage() {
   const [testEmail, setTestEmail] = useState('admin@genzura.com');
   const [testPassword, setTestPassword] = useState('admin123');
   const [authToken, setAuthToken] = useState<string | null>(null);
+  const [connectionTest, setConnectionTest] = useState<any>(null);
 
   // API hooks
   const { data: organizations, execute: fetchOrganizations } = useOrganizations();
   const { data: branches, execute: fetchBranches } = useBranches();
   const { data: employees, execute: fetchEmployees } = useEmployees();
+
+  // Test basic connection to backend
+  const testConnection = async () => {
+    try {
+      const response = await fetch('https://genzura.aphezis.com/health', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const data = await response.json().catch(() => ({ message: 'No JSON response' }));
+      setConnectionTest({
+        status: response.status,
+        ok: response.ok,
+        data: data,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+      
+      if (response.ok) {
+        toast.success('Backend connection successful!');
+      } else {
+        toast.error(`Backend connection failed: ${response.status}`);
+      }
+    } catch (error) {
+      setConnectionTest({
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString()
+      });
+      toast.error('Backend connection failed');
+    }
+  };
 
   // Test authentication
   const testAuth = async () => {
@@ -77,6 +110,32 @@ export default function ApiTestPage() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">API Integration Test</h1>
           <p className="text-gray-600">Test the Rust backend integration with your Next.js frontend</p>
         </div>
+
+        {/* Connection Test */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Badge variant={connectionTest?.ok ? 'default' : 'secondary'}>
+                {connectionTest?.ok ? 'Connected' : 'Not Tested'}
+              </Badge>
+              Backend Connection Test
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Button onClick={testConnection}>
+              Test Backend Connection
+            </Button>
+            
+            {connectionTest && (
+              <div className="p-3 bg-gray-50 border rounded-lg">
+                <h4 className="font-medium mb-2">Connection Details:</h4>
+                <pre className="text-xs overflow-auto">
+                  {JSON.stringify(connectionTest, null, 2)}
+                </pre>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Authentication Test */}
         <Card>
@@ -205,7 +264,7 @@ export default function ApiTestPage() {
                 <span className="text-sm">Frontend: Next.js running</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <div className={`w-3 h-3 rounded-full ${connectionTest?.ok ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                 <span className="text-sm">Backend: Rust API at https://genzura.aphezis.com</span>
               </div>
               <div className="flex items-center gap-2">
@@ -222,10 +281,11 @@ export default function ApiTestPage() {
             <CardTitle>Testing Instructions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm text-gray-600">
-            <p>1. <strong>Authenticate:</strong> Use the demo credentials to test login</p>
-            <p>2. <strong>Test API:</strong> Click "Test All API Endpoints" to verify backend connectivity</p>
-            <p>3. <strong>Check Console:</strong> Open browser dev tools to see detailed API responses</p>
-            <p>4. <strong>Verify Data:</strong> Check that organizations, branches, and employees load correctly</p>
+            <p>1. <strong>Test Connection:</strong> Click "Test Backend Connection" to verify backend accessibility</p>
+            <p>2. <strong>Authenticate:</strong> Use the demo credentials to test login</p>
+            <p>3. <strong>Test API:</strong> Click "Test All API Endpoints" to verify backend connectivity</p>
+            <p>4. <strong>Check Console:</strong> Open browser dev tools to see detailed API responses</p>
+            <p>5. <strong>Verify Data:</strong> Check that organizations, branches, and employees load correctly</p>
           </CardContent>
         </Card>
       </div>

@@ -123,11 +123,49 @@ class ApiClient {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+        console.error('Backend error response:', errorData);
+        const errorMessage = errorData.message || errorData.error || `HTTP error! status: ${response.status}`;
+        return {
+          status: 'error',
+          error: errorMessage,
+        };
       }
 
       const data = await response.json();
-      return data;
+      console.log('Backend response data:', data);
+      
+      // Check if the response has the expected structure
+      if (data.token && data.user) {
+        // Standard login response
+        return {
+          status: 'success',
+          data: data,
+        };
+      } else if (data.data) {
+        // Response wrapped in data field
+        return {
+          status: 'success',
+          data: data.data,
+        };
+      } else if (Array.isArray(data)) {
+        // Direct array response (e.g., for lists)
+        return {
+          status: 'success',
+          data: data,
+        };
+      } else if (data.id) {
+        // Single object response
+        return {
+          status: 'success',
+          data: data,
+        };
+      } else {
+        // Generic success response
+        return {
+          status: 'success',
+          data: data,
+        };
+      }
     } catch (error) {
       console.error('API request failed:', error);
       return {
@@ -313,6 +351,23 @@ class ApiClient {
     if (typeof window !== 'undefined') {
       localStorage.setItem('authToken', token);
     }
+  }
+
+  // Method to validate credentials before sending to backend
+  validateCredentials(email: string, password: string): { isValid: boolean; error?: string } {
+    if (!email || !password) {
+      return { isValid: false, error: 'Email and password are required' };
+    }
+    
+    if (!email.includes('@')) {
+      return { isValid: false, error: 'Please enter a valid email address' };
+    }
+    
+    if (password.length < 3) {
+      return { isValid: false, error: 'Password must be at least 3 characters long' };
+    }
+
+    return { isValid: true };
   }
 }
 

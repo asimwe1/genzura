@@ -3,19 +3,22 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Package, Mail, Lock, AlertCircle } from "lucide-react";
+import { Package, Mail, Lock, AlertCircle, Eye, EyeOff } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AuthForm from "@/components/ui/AuthForm";
 import { useLogin, usePlatformLogin } from "@/hooks/useApi";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { apiClient } from "@/lib/api";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [portalType, setPortalType] = useState("product");
   const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [debugMode, setDebugMode] = useState(false);
   const router = useRouter();
 
   // API hooks
@@ -26,8 +29,19 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Clear any previous errors
+    loginHook.reset();
+    platformLoginHook.reset();
+    
     if (!email || !password) {
       toast.error("Please fill in all fields");
+      return;
+    }
+
+    // Validate credentials before sending to backend
+    const validation = apiClient.validateCredentials(email, password);
+    if (!validation.isValid) {
+      toast.error(validation.error || "Invalid credentials");
       return;
     }
 
@@ -35,10 +49,14 @@ export default function LoginPage() {
       let response;
       
       if (isPlatformAdmin) {
+        console.log("Attempting platform admin login...");
         response = await platformLoginHook.execute({ email, password });
       } else {
+        console.log("Attempting organization user login...");
         response = await loginHook.execute({ email, password });
       }
+
+      console.log("Login response:", response);
 
       if (response?.status === 'success' && response.data?.token) {
         // Store authentication data
@@ -57,11 +75,13 @@ export default function LoginPage() {
         const redirectPath = portalType === "service" ? "/service" : "/product";
         router.push(redirectPath);
       } else {
-        toast.error(response?.error || "Login failed");
+        const errorMessage = response?.error || "Login failed. Please check your credentials.";
+        toast.error(errorMessage);
+        console.error("Login failed:", response);
       }
     } catch (error) {
-      toast.error("An error occurred during login");
       console.error("Login error:", error);
+      toast.error("An error occurred during login. Please try again.");
     }
   };
 
@@ -72,6 +92,19 @@ export default function LoginPage() {
 
   // Show loading state
   const isLoading = loginHook.loading || platformLoginHook.loading;
+
+  // Toggle debug mode (hold Ctrl+Shift+D)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+        setDebugMode(prev => !prev);
+        toast.info(`Debug mode ${!debugMode ? 'enabled' : 'disabled'}`);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [debugMode]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
@@ -88,6 +121,14 @@ export default function LoginPage() {
             <div className="flex items-center gap-2 px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg">
               <AlertCircle className="h-4 w-4 text-yellow-600" />
               <span className="text-sm text-yellow-800 font-medium">Platform Administrator</span>
+            </div>
+          )}
+
+          {/* Debug Mode Indicator */}
+          {debugMode && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              <span className="text-sm text-red-800 font-medium">Debug Mode Active</span>
             </div>
           )}
         </div>
@@ -110,7 +151,7 @@ export default function LoginPage() {
             {
               name: "password",
               label: "Password",
-              type: "password",
+              type: showPassword ? "text" : "password",
               placeholder: "••••••••",
               required: true,
               value: password,
@@ -120,6 +161,26 @@ export default function LoginPage() {
           ]}
         >
           <div className="space-y-4">
+            {/* Password Visibility Toggle */}
+            <div className="flex items-center justify-end">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowPassword(!showPassword)}
+                className="h-8 px-2"
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+                <span className="ml-2 text-xs">
+                  {showPassword ? "Hide" : "Show"} password
+                </span>
+              </Button>
+            </div>
+
             <label className="block text-base font-medium mb-1">Portal</label>
             <Select value={portalType} onValueChange={setPortalType}>
               <SelectTrigger className="w-full bg-white text-black border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 hover:border-gray-400 transition-colors">
@@ -148,6 +209,22 @@ export default function LoginPage() {
           </div>
         )}
 
+        {/* Debug Information */}
+        {debugMode && (
+          <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Debug Info:</h4>
+            <div className="text-xs text-gray-600 space-y-1">
+              <p>Email: {email}</p>
+              <p>Password Length: {password.length}</p>
+              <p>Is Platform Admin: {isPlatformAdmin.toString()}</p>
+              <p>Portal Type: {portalType}</p>
+              <p>Backend URL: https://genzura.aphezis.com</p>
+              <p>Login Hook Loading: {loginHook.loading.toString()}</p>
+              <p>Platform Login Hook Loading: {platformLoginHook.loading.toString()}</p>
+            </div>
+          </div>
+        )}
+
         <div className="mt-16 text-center">
           <p className="text-base text-gray-600">
             Don&apos;t have an account?{' '}
@@ -164,6 +241,9 @@ export default function LoginPage() {
             <p><strong>Platform Admin:</strong> admin@genzura.com / admin123</p>
             <p><strong>Organization User:</strong> john.doe@democompany.com / user123</p>
           </div>
+          <p className="text-xs text-gray-500 mt-2">
+            💡 Hold Ctrl+Shift+D to toggle debug mode
+          </p>
         </div>
       </div>
     </div>
