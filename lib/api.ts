@@ -369,6 +369,48 @@ class ApiClient {
 
     return { isValid: true };
   }
+
+  // Password Reset
+  async forgotPassword(email: string): Promise<ApiResponse<{ message: string }>> {
+    return this.request<{ message: string }>('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<ApiResponse<{ message: string }>> {
+    return this.request<{ message: string }>('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ token, new_password: newPassword }),
+    });
+  }
+
+  async verifyResetToken(token: string): Promise<ApiResponse<{ email: string }>> {
+    return this.request<{ email: string }>('/auth/verify-reset-token', {
+      method: 'GET',
+    });
+  }
+
+  // Token Refresh
+  async refreshToken(): Promise<ApiResponse<{ token: string }>> {
+    const response = await this.request<{ token: string }>('/auth/refresh', {
+      method: 'POST',
+    });
+
+    if (response.status === 'success' && response.data?.token) {
+      this.token = response.data.token;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('authToken', response.data.token);
+      }
+    }
+
+    return response;
+  }
+
+  // Health Check
+  async healthCheck(): Promise<ApiResponse<{ status: string; timestamp: string; version?: string }>> {
+    return this.request<{ status: string; timestamp: string; version?: string }>('/health');
+  }
 }
 
 // Export singleton instance

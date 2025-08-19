@@ -194,3 +194,26 @@ export function useUpdateEmployee() {
 export function useDeleteEmployee() {
   return useApi(apiClient.deleteEmployee.bind(apiClient));
 }
+
+// Password Reset hooks
+export function useForgotPassword() {
+  return useApi(apiClient.forgotPassword.bind(apiClient));
+}
+
+export function useResetPassword() {
+  return useApi(apiClient.resetPassword.bind(apiClient));
+}
+
+export function useVerifyResetToken() {
+  return useApi(apiClient.verifyResetToken.bind(apiClient));
+}
+
+// Token refresh hook
+export function useRefreshToken() {
+  return useApi(apiClient.refreshToken.bind(apiClient));
+}
+
+// Health check hook
+export function useHealthCheck() {
+  return useApi(apiClient.healthCheck.bind(apiClient));
+}

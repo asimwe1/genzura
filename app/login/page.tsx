@@ -23,7 +23,7 @@ export default function LoginPage() {
 
   // API hooks
   const loginHook = useLogin();
-  const platformLoginHook = useLogin();
+  const platformLoginHook = usePlatformLogin();
 
   // Handle login based on portal type
   const handleLogin = async (e: React.FormEvent) => {
