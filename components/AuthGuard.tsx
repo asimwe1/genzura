@@ -66,27 +66,39 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!checked) return;
 
-    // Public routes that don't require authentication
-    const publicRoutes = ["/login", "/signup", "/forgot-password", "/reset-password"];
-    const isPublicRoute = publicRoutes.includes(pathname);
+      // Public routes that don't require authentication
+  const publicRoutes = ["/login", "/signup", "/forgot-password", "/reset-password"];
+  const isPublicRoute = publicRoutes.includes(pathname);
 
-    // If not authenticated and not on a public route, redirect to login
-    if (!isAuth && !isPublicRoute) {
-      router.replace("/login");
+  // Platform admin route
+  const isPlatformRoute = pathname.startsWith("/platform");
+
+  // If not authenticated and not on a public route, redirect to login
+  if (!isAuth && !isPublicRoute) {
+    router.replace("/login");
+    return;
+  }
+
+  // If authenticated and on a public route, redirect to appropriate portal
+  if (isAuth && isPublicRoute) {
+    router.replace(businessType === "service" ? "/service" : "/product");
+    return;
+  }
+
+  // If authenticated and on root path, redirect to appropriate portal
+  if (isAuth && pathname === "/") {
+    router.replace(businessType === "service" ? "/service" : "/product");
+    return;
+  }
+
+  // Check platform admin access
+  if (isAuth && isPlatformRoute) {
+    const userRole = localStorage.getItem("userRole");
+    if (userRole !== "platform_admin") {
+      router.replace("/product");
       return;
     }
-
-    // If authenticated and on a public route, redirect to appropriate portal
-    if (isAuth && isPublicRoute) {
-      router.replace(businessType === "service" ? "/service" : "/product");
-      return;
-    }
-
-    // If authenticated and on root path, redirect to appropriate portal
-    if (isAuth && pathname === "/") {
-      router.replace(businessType === "service" ? "/service" : "/product");
-      return;
-    }
+  }
   }, [isAuth, checked, pathname, router, businessType]);
 
   // Show loading while checking auth

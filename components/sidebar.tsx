@@ -1,6 +1,6 @@
 "use client"
 
-import { Building2, FileText, Home, Package, Settings, Truck, Users, Wallet, MoreHorizontal, Crown, Bot } from "lucide-react"
+import { Building2, FileText, Home, Package, Settings, Truck, Users, Wallet, MoreHorizontal, Crown, Bot, Shield } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import React, { useState } from "react"
@@ -77,10 +77,30 @@ const menuItems = [
 
 export function AppSidebar() {
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [isPlatformAdmin, setIsPlatformAdmin] = useState(false);
+
+  // Check if user is platform admin
+  React.useEffect(() => {
+    const userRole = localStorage.getItem("userRole");
+    setIsPlatformAdmin(userRole === "platform_admin");
+  }, []);
+
+  // Add platform admin menu item if user has access
+  const enhancedMenuItems = isPlatformAdmin 
+    ? [
+        ...menuItems,
+        {
+          title: "Platform Admin",
+          url: "/platform",
+          icon: Shield,
+        }
+      ]
+    : menuItems;
+
   return (
     <>
       <BaseSidebar
-        menuItems={menuItems}
+        menuItems={enhancedMenuItems}
         headerIcon={<Package className="h-4 w-4 text-white bg-blue-600 rounded-lg p-1" />}
         headerTitle="Inventory Management"
         footer={
