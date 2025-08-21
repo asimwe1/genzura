@@ -3,7 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Package, Mail, Lock, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Package, Mail, Lock, AlertCircle, Eye, EyeOff, CheckCircle, Loader2 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import AuthForm from "@/components/ui/AuthForm";
@@ -29,8 +29,8 @@ export default function LoginPage() {
   const [networkStatus, setNetworkStatus] = useState<'checking' | 'online' | 'offline'>('checking');
   const [retryCount, setRetryCount] = useState(0);
   const [lastError, setLastError] = useState<string | null>(null);
-
-
+  const [loginStatus, setLoginStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [loginMessage, setLoginMessage] = useState<string>('');
 
   // Check if user is platform admin based on email
   useEffect(() => {
@@ -38,7 +38,7 @@ export default function LoginPage() {
   }, [email]);
 
   // Show loading state
-  const isLoading = loginHook.loading || platformLoginHook.loading;
+  const isLoading = loginHook.loading || platformLoginHook.loading || loginStatus === 'loading';
 
   // Check network status on mount
   useEffect(() => {
@@ -78,6 +78,8 @@ export default function LoginPage() {
       if (response.ok) {
         setNetworkStatus('online');
         setLastError(null);
+        setLoginStatus('idle');
+        setLoginMessage('');
         toast.success('Backend connection restored!');
       } else {
         setNetworkStatus('offline');
@@ -94,12 +96,21 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Reset previous status
+    setLoginStatus('loading');
+    setLoginMessage('');
+    setLastError(null);
+    
     if (networkStatus === 'offline') {
+      setLoginStatus('error');
+      setLoginMessage('Cannot login while offline. Please check your connection and try again.');
       toast.error('Cannot login while offline. Please check your connection and try again.');
       return;
     }
 
     if (!email || !password) {
+      setLoginStatus('error');
+      setLoginMessage('Please fill in all required fields');
       toast.error('Please fill in all fields');
       return;
     }
@@ -107,7 +118,6 @@ export default function LoginPage() {
     // Clear any previous errors
     loginHook.reset();
     platformLoginHook.reset();
-    setLastError(null);
 
     try {
       let response;
@@ -126,19 +136,25 @@ export default function LoginPage() {
           localStorage.setItem('businessType', portalType);
         }
         
+        setLoginStatus('success');
+        setLoginMessage(`Welcome back! Redirecting to ${portalType}...`);
         toast.success(`Welcome back! Redirecting to ${portalType}...`);
         
-        // Redirect based on portal type
-        if (isPlatformAdmin) {
-          router.push('/platform');
-        } else {
-          router.push('/product');
-        }
+        // Redirect after a short delay to show success message
+        setTimeout(() => {
+          if (isPlatformAdmin) {
+            router.push('/platform');
+          } else {
+            router.push('/product');
+          }
+        }, 1500);
       } else {
         const errorMsg = response?.error || 'Login failed. Please check your credentials.';
-        setLastError(errorMsg);
+        setLoginStatus('error');
+        setLoginMessage(errorMsg);
         
         if (response?.offline) {
+          setLoginMessage('Backend is currently offline. Please try again later.');
           toast.error('Backend is currently offline. Please try again later.');
         } else {
           toast.error(errorMsg);
@@ -147,7 +163,8 @@ export default function LoginPage() {
     } catch (error) {
       console.error('Login error:', error);
       const errorMsg = error instanceof Error ? error.message : 'An unexpected error occurred';
-      setLastError(errorMsg);
+      setLoginStatus('error');
+      setLoginMessage(errorMsg);
       toast.error('Login failed. Please try again.');
     }
   };
@@ -228,6 +245,8 @@ export default function LoginPage() {
           mode="login"
           onSubmit={handleLogin}
           loading={isLoading}
+          error={loginStatus === 'error' ? loginMessage : undefined}
+          success={loginStatus === 'success' ? loginMessage : undefined}
           fields={[
             {
               name: "email",
@@ -291,12 +310,39 @@ export default function LoginPage() {
           </div>
         </AuthForm>
 
-        {/* Error Display */}
-        {(loginHook.error || platformLoginHook.error) && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-700">
-              {loginHook.error || platformLoginHook.error}
-            </p>
+        {/* Login Status Indicator */}
+        {loginStatus !== 'idle' && (
+          <div className={`mt-4 p-4 rounded-lg border ${
+            loginStatus === 'success' 
+              ? 'bg-green-50 border-green-200' 
+              : loginStatus === 'error'
+              ? 'bg-red-50 border-red-200'
+              : 'bg-blue-50 border-blue-200'
+          }`}>
+            <div className="flex items-center gap-3">
+              {loginStatus === 'success' ? (
+                <CheckCircle className="h-5 w-5 text-green-600" />
+              ) : loginStatus === 'error' ? (
+                <AlertCircle className="h-5 w-5 text-red-600" />
+              ) : (
+                <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
+              )}
+              <div className="flex-1">
+                <p className={`text-sm font-medium ${
+                  loginStatus === 'success' ? 'text-green-800' : 
+                  loginStatus === 'error' ? 'text-red-800' : 'text-blue-800'
+                }`}>
+                  {loginStatus === 'success' ? 'Login Successful!' : 
+                   loginStatus === 'error' ? 'Login Failed' : 'Processing Login...'}
+                </p>
+                <p className={`text-sm mt-1 ${
+                  loginStatus === 'success' ? 'text-green-700' : 
+                  loginStatus === 'error' ? 'text-red-700' : 'text-blue-700'
+                }`}>
+                  {loginMessage}
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
@@ -329,7 +375,7 @@ export default function LoginPage() {
         {lastError && networkStatus === 'offline' && (
           <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+              <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
               <div className="flex-1">
                 <h4 className="text-sm font-medium text-red-800 mb-2">Connection Issue</h4>
                 <p className="text-sm text-red-700 mb-3">
@@ -345,16 +391,43 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* Demo Credentials Info */}
-        <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-          <h3 className="text-sm font-medium text-gray-700 mb-2">Demo Credentials:</h3>
-          <div className="text-xs text-gray-600 space-y-1">
-            <p><strong>Platform Admin:</strong> admin@genzura.com / admin123</p>
-            <p><strong>Organization User:</strong> john.doe@democompany.com / user123</p>
+        {/* User Guidance */}
+        <div className="mt-8 space-y-4">
+          {/* Demo Credentials Info */}
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <h3 className="text-sm font-medium text-gray-700 mb-2">Demo Credentials:</h3>
+            <div className="text-xs text-gray-600 space-y-1">
+              <p><strong>Platform Admin:</strong> admin@genzura.com / admin123</p>
+              <p><strong>Organization User:</strong> john.doe@democompany.com / user123</p>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              💡 Hold Ctrl+Shift+D to toggle debug mode
+            </p>
           </div>
-          <p className="text-xs text-gray-500 mt-2">
-            💡 Hold Ctrl+Shift+D to toggle debug mode
-          </p>
+
+          {/* Troubleshooting Guide */}
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h3 className="text-sm font-medium text-blue-800 mb-2">Having trouble logging in?</h3>
+            <div className="text-xs text-blue-700 space-y-1">
+              <p>• Check your internet connection</p>
+              <p>• Verify your email and password</p>
+              <p>• Make sure you've selected the correct portal</p>
+              <p>• Try refreshing the page if issues persist</p>
+            </div>
+          </div>
+
+          {/* Connection Status Help */}
+          {networkStatus === 'offline' && (
+            <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+              <h3 className="text-sm font-medium text-orange-800 mb-2">Connection Issue Detected</h3>
+              <div className="text-xs text-orange-700 space-y-1">
+                <p>• The backend server is currently unreachable</p>
+                <p>• This may be a temporary network issue</p>
+                <p>• Try the "Retry Connection" button above</p>
+                <p>• Contact support if the problem persists</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Backend Status Info */}
