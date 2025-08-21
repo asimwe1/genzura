@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from "sonner"
+import OfflineBanner from "@/components/OfflineBanner"
 
 export default function ProductPortal() {
   const router = useRouter()
@@ -110,8 +111,10 @@ export default function ProductPortal() {
   ]
 
   return (
-    <TooltipProvider>
-      <div className="flex-1 space-y-3 p-2 sm:p-4 md:pr-4 lg:pr-6 xl:pr-8 md:pt-4 pt-2">
+    <>
+      <OfflineBanner portalType="Product Portal" />
+      <TooltipProvider>
+        <div className="flex-1 space-y-3 p-2 sm:p-4 md:pr-4 lg:pr-6 xl:pr-8 md:pt-4 pt-2">
         {/* Header - Responsive */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           {/* Search Bar */}
@@ -605,6 +608,7 @@ export default function ProductPortal() {
           </div>
         </div>
       </div>
-    </TooltipProvider>
-  )
+        </TooltipProvider>
+      </>
+    )
 } 

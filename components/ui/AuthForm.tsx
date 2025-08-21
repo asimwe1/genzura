@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 
 /**
  * AuthForm is a reusable authentication form for login and signup.
@@ -11,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
  * - mode: "login" | "signup"
  * - onSubmit: (fields) => void
  * - loading: boolean
+ * - error?: string
+ * - success?: string
  * - fields: Array<{
  *     name: string;
  *     label: string;
@@ -28,6 +31,8 @@ export default function AuthForm({
   mode = "login",
   onSubmit,
   loading = false,
+  error,
+  success,
   fields = [],
   children,
   submitLabel,
@@ -36,6 +41,8 @@ export default function AuthForm({
   mode: "login" | "signup";
   onSubmit: (e: React.FormEvent) => void;
   loading?: boolean;
+  error?: string;
+  success?: string;
   fields: Array<{
     name: string;
     label: string;
@@ -52,10 +59,32 @@ export default function AuthForm({
   extraAction?: React.ReactNode;
 }) {
   return (
-    <form className="space-y-8" onSubmit={onSubmit}>
+    <form className="space-y-6" onSubmit={onSubmit}>
+      {/* Error Message */}
+      {error && (
+        <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-red-800">Authentication Error</p>
+            <p className="text-sm text-red-700 mt-1">{error}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Success Message */}
+      {success && (
+        <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-green-800">Success!</p>
+            <p className="text-sm text-green-700 mt-1">{success}</p>
+          </div>
+        </div>
+      )}
+
       {fields.map((field) => (
-        <div className="space-y-4" key={field.name}>
-          <Label className="block text-base font-medium mb-1">{field.label}</Label>
+        <div className="space-y-3" key={field.name}>
+          <Label className="block text-base font-medium text-gray-700">{field.label}</Label>
           <div className="relative">
             {field.icon && (
               <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 flex items-center">{field.icon}</span>
@@ -71,19 +100,30 @@ export default function AuthForm({
               value={field.value}
               onChange={field.onChange}
               required={field.required}
+              disabled={loading}
             />
           </div>
         </div>
       ))}
+      
       {children}
+      
       <Button
         type="submit"
-        className="w-full mt-6 py-5 text-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors rounded-lg shadow-lg"
+        className="w-full mt-6 py-5 text-lg font-semibold bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white transition-all duration-200 rounded-lg shadow-lg relative overflow-hidden"
         disabled={loading}
       >
-        {loading ? (mode === "login" ? "Signing in..." : "Creating account...") : submitLabel || (mode === "login" ? "Sign In" : "Create Account")}
+        {loading ? (
+          <>
+            <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+            {mode === "login" ? "Signing in..." : "Creating account..."}
+          </>
+        ) : (
+          submitLabel || (mode === "login" ? "Sign In" : "Create Account")
+        )}
       </Button>
-      {extraAction && <div className="mt-8">{extraAction}</div>}
+      
+      {extraAction && <div className="mt-6">{extraAction}</div>}
     </form>
   );
 } 

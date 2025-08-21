@@ -6,6 +6,8 @@ export interface ApiResponse<T = any> {
   message?: string;
   error?: string;
   status: 'success' | 'error';
+  offline?: boolean;
+  retryAfter?: number;
 }
 
 export interface LoginRequest {
@@ -94,10 +96,68 @@ export interface UpdateEmployeeRequest extends Partial<CreateEmployeeRequest> {}
 class ApiClient {
   private baseUrl: string;
   private token: string | null;
+  private isOffline: boolean = false;
+  private lastOnlineCheck: number = 0;
+  private retryAttempts: number = 0;
+  private maxRetries: number = 3;
 
   constructor(baseUrl: string = 'https://genzura.aphezis.com') {
     this.baseUrl = baseUrl;
     this.token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+    
+    // Check online status on initialization
+    if (typeof window !== 'undefined') {
+      this.checkOnlineStatus();
+      // Listen for online/offline events
+      window.addEventListener('online', () => this.handleOnline());
+      window.addEventListener('offline', () => this.handleOffline());
+    }
+  }
+
+  private async checkOnlineStatus(): Promise<boolean> {
+    const now = Date.now();
+    // Only check every 30 seconds to avoid excessive requests
+    if (now - this.lastOnlineCheck < 30000) {
+      return !this.isOffline;
+    }
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout (1 minute)
+      
+      const response = await fetch(`${this.baseUrl}/health`, {
+        method: 'GET',
+        signal: controller.signal,
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        this.isOffline = false;
+        this.retryAttempts = 0;
+        this.lastOnlineCheck = now;
+        return true;
+      } else {
+        this.isOffline = true;
+        return false;
+      }
+    } catch (error) {
+      this.isOffline = true;
+      this.lastOnlineCheck = now;
+      return false;
+    }
+  }
+
+  private handleOnline(): void {
+    this.isOffline = false;
+    this.retryAttempts = 0;
+    console.log('Network connection restored');
+  }
+
+  private handleOffline(): void {
+    this.isOffline = true;
+    console.log('Network connection lost');
   }
 
   private async request<T>(
@@ -106,6 +166,19 @@ class ApiClient {
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
     
+    // Check if we're offline first
+    if (this.isOffline) {
+      const online = await this.checkOnlineStatus();
+      if (!online) {
+        return {
+          status: 'error',
+          error: 'You are currently offline. Please check your internet connection and try again.',
+          offline: true,
+          retryAfter: 30
+        };
+      }
+    }
+
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
       ...options.headers,
@@ -115,64 +188,156 @@ class ApiClient {
       headers.Authorization = `Bearer ${this.token}`;
     }
 
-    try {
-      const response = await fetch(url, {
-        ...options,
-        headers,
-      });
+    // Retry logic for failed requests
+    for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
+      try {
+        console.log(`Making API request to: ${url} (attempt ${attempt}/${this.maxRetries})`);
+        
+        // Add timeout to the request
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout (1 minute)
+        
+        const response = await fetch(url, {
+          ...options,
+          headers,
+          signal: controller.signal,
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Backend error response:', errorData);
-        const errorMessage = errorData.message || errorData.error || `HTTP error! status: ${response.status}`;
-        return {
-          status: 'error',
-          error: errorMessage,
-        };
-      }
+        clearTimeout(timeoutId);
+        console.log(`Response status: ${response.status} ${response.statusText}`);
 
-      const data = await response.json();
-      console.log('Backend response data:', data);
-      
-      // Check if the response has the expected structure
-      if (data.token && data.user) {
-        // Standard login response
-        return {
-          status: 'success',
-          data: data,
-        };
-      } else if (data.data) {
-        // Response wrapped in data field
-        return {
-          status: 'success',
-          data: data.data,
-        };
-      } else if (Array.isArray(data)) {
-        // Direct array response (e.g., for lists)
-        return {
-          status: 'success',
-          data: data,
-        };
-      } else if (data.id) {
-        // Single object response
-        return {
-          status: 'success',
-          data: data,
-        };
-      } else {
-        // Generic success response
-        return {
-          status: 'success',
-          data: data,
-        };
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('Backend error response:', errorData);
+          const errorMessage = errorData.message || errorData.error || `HTTP error! status: ${response.status}`;
+          
+          // Don't retry on client errors (4xx)
+          if (response.status >= 400 && response.status < 500) {
+            return {
+              status: 'error',
+              error: errorMessage,
+            };
+          }
+          
+          // Retry on server errors (5xx) or network issues
+          if (attempt < this.maxRetries) {
+            console.log(`Request failed, retrying in ${attempt * 2} seconds...`);
+            await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+            continue;
+          }
+          
+          return {
+            status: 'error',
+            error: errorMessage,
+          };
+        }
+
+        const data = await response.json();
+        console.log('Backend response data:', data);
+        
+        // Reset offline status on successful request
+        this.isOffline = false;
+        this.retryAttempts = 0;
+        
+        // Check if the response has the expected structure
+        if (data.token && data.user) {
+          // Standard login response
+          return {
+            status: 'success',
+            data: data,
+          };
+        } else if (data.data) {
+          // Response wrapped in data field
+          return {
+            status: 'success',
+            data: data.data,
+          };
+        } else if (Array.isArray(data)) {
+          // Direct array response (e.g., for lists)
+          return {
+            status: 'success',
+            data: data,
+          };
+        } else if (data.id) {
+          // Single object response
+          return {
+            status: 'success',
+            data: data,
+          };
+        } else {
+          // Generic success response
+          return {
+            status: 'success',
+            data: data,
+          };
+        }
+      } catch (error) {
+        console.error(`API request failed (attempt ${attempt}/${this.maxRetries}):`, error);
+        
+        // Handle timeout errors
+        if (error instanceof Error && error.name === 'AbortError') {
+          if (attempt < this.maxRetries) {
+            console.log(`Request timeout, retrying in ${attempt * 2} seconds...`);
+            await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+            continue;
+          }
+          
+          this.isOffline = true;
+          return {
+            status: 'error',
+            error: 'Request timeout: The server took too long to respond. Please try again.',
+            offline: true,
+            retryAfter: 15
+          };
+        }
+        
+        // Handle specific network errors
+        if (error instanceof TypeError && error.message.includes('fetch')) {
+          if (attempt < this.maxRetries) {
+            console.log(`Network error, retrying in ${attempt * 2} seconds...`);
+            await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+            continue;
+          }
+          
+          this.isOffline = true;
+          return {
+            status: 'error',
+            error: 'Network error: Unable to connect to the backend server. Please check your internet connection and try again.',
+            offline: true,
+            retryAfter: 30
+          };
+        }
+        
+        if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+          if (attempt < this.maxRetries) {
+            console.log(`Connection failed, retrying in ${attempt * 2} seconds...`);
+            await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+            continue;
+          }
+          
+          this.isOffline = true;
+          return {
+            status: 'error',
+            error: 'Connection failed: The backend server is not accessible. Please try again later or contact support.',
+            offline: true,
+            retryAfter: 60
+          };
+        }
+        
+        // If we've exhausted all retries, return the error
+        if (attempt === this.maxRetries) {
+          return {
+            status: 'error',
+            error: error instanceof Error ? error.message : 'Unknown error occurred',
+          };
+        }
       }
-    } catch (error) {
-      console.error('API request failed:', error);
-      return {
-        status: 'error',
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
-      };
     }
+    
+    return {
+      status: 'error',
+      error: 'Maximum retry attempts exceeded',
+    };
   }
 
   // Authentication
@@ -205,6 +370,46 @@ class ApiClient {
         localStorage.setItem('authToken', response.data.token);
         localStorage.setItem('userRole', response.data.user.role);
         localStorage.setItem('organizationId', response.data.user.organization_id?.toString() || '');
+      }
+    }
+
+    return response;
+  }
+
+  async signup(signupData: {
+    organizationName: string;
+    email: string;
+    password: string;
+    businessType: string;
+    businessCategory: string;
+  }): Promise<ApiResponse<LoginResponse>> {
+    const response = await this.request<LoginResponse>('/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify({
+        organization: {
+          name: signupData.organizationName,
+          tier: 'Basic',
+          subscription_start: new Date().toISOString().split('T')[0],
+          subscription_end: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        },
+        user: {
+          email: signupData.email,
+          password: signupData.password,
+          role: 'SuperAdmin',
+        },
+        business_type: signupData.businessType,
+        business_category: signupData.businessCategory,
+      }),
+    });
+
+    if (response.status === 'success' && response.data?.token) {
+      this.token = response.data.token;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('authToken', response.data.token);
+        localStorage.setItem('userRole', response.data.user.role);
+        localStorage.setItem('organizationId', response.data.user.organization_id?.toString() || '');
+        localStorage.setItem('businessType', signupData.businessType);
+        localStorage.setItem('organizationName', signupData.organizationName);
       }
     }
 
@@ -368,6 +573,59 @@ class ApiClient {
     }
 
     return { isValid: true };
+  }
+
+  // Password Reset
+  async forgotPassword(email: string): Promise<ApiResponse<{ message: string }>> {
+    return this.request<{ message: string }>('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<ApiResponse<{ message: string }>> {
+    return this.request<{ message: string }>('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ token, new_password: newPassword }),
+    });
+  }
+
+  async verifyResetToken(token: string): Promise<ApiResponse<{ email: string }>> {
+    return this.request<{ email: string }>('/auth/verify-reset-token', {
+      method: 'GET',
+    });
+  }
+
+  // Token Refresh
+  async refreshToken(): Promise<ApiResponse<{ token: string }>> {
+    const response = await this.request<{ token: string }>('/auth/refresh', {
+      method: 'POST',
+    });
+
+    if (response.status === 'success' && response.data?.token) {
+      this.token = response.data.token;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('authToken', response.data.token);
+      }
+    }
+
+    return response;
+  }
+
+  // Health Check
+  async healthCheck(): Promise<ApiResponse<{ status: string; timestamp: string; version?: string }>> {
+    return this.request<{ status: string; timestamp: string; version?: string }>('/health');
+  }
+
+  // Get current offline status
+  getOfflineStatus(): boolean {
+    return this.isOffline;
+  }
+
+  // Force check online status
+  async forceCheckOnline(): Promise<boolean> {
+    this.lastOnlineCheck = 0;
+    return await this.checkOnlineStatus();
   }
 }
 

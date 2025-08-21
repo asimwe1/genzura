@@ -10,13 +10,16 @@ import { Moon, Sun, Monitor, Package, Mail, ArrowLeft } from "lucide-react"
 import { useTheme } from "next-themes"
 import Link from "next/link"
 import { toast } from "sonner"
+import { useForgotPassword } from "@/hooks/useApi"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const router = useRouter()
   const { theme, setTheme } = useTheme()
+  
+  // API hook for password reset
+  const forgotPasswordHook = useForgotPassword()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,14 +29,22 @@ export default function ForgotPasswordPage() {
       return
     }
     
-    setIsLoading(true)
+    // Clear any previous errors
+    forgotPasswordHook.reset()
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
-      setIsSubmitted(true)
-      toast.success("Password reset link sent to your email!")
-    }, 2000)
+    try {
+      const response = await forgotPasswordHook.execute(email)
+      
+      if (response?.status === 'success') {
+        setIsSubmitted(true)
+        toast.success("Password reset link sent to your email!")
+      } else {
+        toast.error(response?.error || "Failed to send password reset email")
+      }
+    } catch (error) {
+      toast.error("An error occurred. Please try again.")
+      console.error("Password reset error:", error)
+    }
   }
 
   return (
@@ -98,12 +109,22 @@ export default function ForgotPasswordPage() {
                   />
                 </div>
               </div>
+              
+              {/* Error Display */}
+              {forgotPasswordHook.error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-700">
+                    {forgotPasswordHook.error}
+                  </p>
+                </div>
+              )}
+              
               <Button
                 type="submit"
                 className="w-full py-4 text-lg mt-2"
-                disabled={isLoading}
+                disabled={forgotPasswordHook.loading}
               >
-                {isLoading ? "Sending..." : "Send Reset Link"}
+                {forgotPasswordHook.loading ? "Sending..." : "Send Reset Link"}
               </Button>
             </form>
           ) : (

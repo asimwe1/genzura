@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { apiClient } from '@/lib/api';
-import { useOrganizations, useBranches, useEmployees } from '@/hooks/useApi';
+import { useOrganizations, useBranches, useEmployees, useHealthCheck } from '@/hooks/useApi';
 
 export default function ApiTestPage() {
   const [testEmail, setTestEmail] = useState('admin@genzura.com');
@@ -20,29 +20,29 @@ export default function ApiTestPage() {
   const { data: organizations, execute: fetchOrganizations } = useOrganizations();
   const { data: branches, execute: fetchBranches } = useBranches();
   const { data: employees, execute: fetchEmployees } = useEmployees();
+  const { execute: healthCheck } = useHealthCheck();
 
   // Test basic connection to backend
   const testConnection = async () => {
     try {
-      const response = await fetch('https://genzura.aphezis.com/health', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await healthCheck();
       
-      const data = await response.json().catch(() => ({ message: 'No JSON response' }));
-      setConnectionTest({
-        status: response.status,
-        ok: response.ok,
-        data: data,
-        headers: Object.fromEntries(response.headers.entries())
-      });
-      
-      if (response.ok) {
+      if (response?.status === 'success') {
+        setConnectionTest({
+          status: 200,
+          ok: true,
+          data: response.data,
+          timestamp: new Date().toISOString()
+        });
         toast.success('Backend connection successful!');
       } else {
-        toast.error(`Backend connection failed: ${response.status}`);
+        setConnectionTest({
+          status: 500,
+          ok: false,
+          error: response?.error || 'Health check failed',
+          timestamp: new Date().toISOString()
+        });
+        toast.error('Backend connection failed');
       }
     } catch (error) {
       setConnectionTest({
