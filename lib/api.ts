@@ -188,111 +188,156 @@ class ApiClient {
       headers.Authorization = `Bearer ${this.token}`;
     }
 
-    try {
-      console.log(`Making API request to: ${url}`);
-      
-      // Add timeout to the request
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-      
-      const response = await fetch(url, {
-        ...options,
-        headers,
-        signal: controller.signal,
-      });
+    // Retry logic for failed requests
+    for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
+      try {
+        console.log(`Making API request to: ${url} (attempt ${attempt}/${this.maxRetries})`);
+        
+        // Add timeout to the request
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+        
+        const response = await fetch(url, {
+          ...options,
+          headers,
+          signal: controller.signal,
+        });
 
-      clearTimeout(timeoutId);
-      console.log(`Response status: ${response.status} ${response.statusText}`);
+        clearTimeout(timeoutId);
+        console.log(`Response status: ${response.status} ${response.statusText}`);
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Backend error response:', errorData);
-        const errorMessage = errorData.message || errorData.error || `HTTP error! status: ${response.status}`;
-        return {
-          status: 'error',
-          error: errorMessage,
-        };
-      }
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('Backend error response:', errorData);
+          const errorMessage = errorData.message || errorData.error || `HTTP error! status: ${response.status}`;
+          
+          // Don't retry on client errors (4xx)
+          if (response.status >= 400 && response.status < 500) {
+            return {
+              status: 'error',
+              error: errorMessage,
+            };
+          }
+          
+          // Retry on server errors (5xx) or network issues
+          if (attempt < this.maxRetries) {
+            console.log(`Request failed, retrying in ${attempt * 2} seconds...`);
+            await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+            continue;
+          }
+          
+          return {
+            status: 'error',
+            error: errorMessage,
+          };
+        }
 
-      const data = await response.json();
-      console.log('Backend response data:', data);
-      
-      // Reset offline status on successful request
-      this.isOffline = false;
-      this.retryAttempts = 0;
-      
-      // Check if the response has the expected structure
-      if (data.token && data.user) {
-        // Standard login response
-        return {
-          status: 'success',
-          data: data,
-        };
-      } else if (data.data) {
-        // Response wrapped in data field
-        return {
-          status: 'success',
-          data: data.data,
-        };
-      } else if (Array.isArray(data)) {
-        // Direct array response (e.g., for lists)
-        return {
-          status: 'success',
-          data: data,
-        };
-      } else if (data.id) {
-        // Single object response
-        return {
-          status: 'success',
-          data: data,
-        };
-      } else {
-        // Generic success response
-        return {
-          status: 'success',
-          data: data,
-        };
+        const data = await response.json();
+        console.log('Backend response data:', data);
+        
+        // Reset offline status on successful request
+        this.isOffline = false;
+        this.retryAttempts = 0;
+        
+        // Check if the response has the expected structure
+        if (data.token && data.user) {
+          // Standard login response
+          return {
+            status: 'success',
+            data: data,
+          };
+        } else if (data.data) {
+          // Response wrapped in data field
+          return {
+            status: 'success',
+            data: data.data,
+          };
+        } else if (Array.isArray(data)) {
+          // Direct array response (e.g., for lists)
+          return {
+            status: 'success',
+            data: data,
+          };
+        } else if (data.id) {
+          // Single object response
+          return {
+            status: 'success',
+            data: data,
+          };
+        } else {
+          // Generic success response
+          return {
+            status: 'success',
+            data: data,
+          };
+        }
+      } catch (error) {
+        console.error(`API request failed (attempt ${attempt}/${this.maxRetries}):`, error);
+        
+        // Handle timeout errors
+        if (error instanceof Error && error.name === 'AbortError') {
+          if (attempt < this.maxRetries) {
+            console.log(`Request timeout, retrying in ${attempt * 2} seconds...`);
+            await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+            continue;
+          }
+          
+          this.isOffline = true;
+          return {
+            status: 'error',
+            error: 'Request timeout: The server took too long to respond. Please try again.',
+            offline: true,
+            retryAfter: 15
+          };
+        }
+        
+        // Handle specific network errors
+        if (error instanceof TypeError && error.message.includes('fetch')) {
+          if (attempt < this.maxRetries) {
+            console.log(`Network error, retrying in ${attempt * 2} seconds...`);
+            await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+            continue;
+          }
+          
+          this.isOffline = true;
+          return {
+            status: 'error',
+            error: 'Network error: Unable to connect to the backend server. Please check your internet connection and try again.',
+            offline: true,
+            retryAfter: 30
+          };
+        }
+        
+        if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+          if (attempt < this.maxRetries) {
+            console.log(`Connection failed, retrying in ${attempt * 2} seconds...`);
+            await new Promise(resolve => setTimeout(resolve, attempt * 2000));
+            continue;
+          }
+          
+          this.isOffline = true;
+          return {
+            status: 'error',
+            error: 'Connection failed: The backend server is not accessible. Please try again later or contact support.',
+            offline: true,
+            retryAfter: 60
+          };
+        }
+        
+        // If we've exhausted all retries, return the error
+        if (attempt === this.maxRetries) {
+          return {
+            status: 'error',
+            error: error instanceof Error ? error.message : 'Unknown error occurred',
+          };
+        }
       }
-    } catch (error) {
-      console.error('API request failed:', error);
-      
-      // Handle timeout errors
-      if (error instanceof Error && error.name === 'AbortError') {
-        this.isOffline = true;
-        return {
-          status: 'error',
-          error: 'Request timeout: The server took too long to respond. Please try again.',
-          offline: true,
-          retryAfter: 15
-        };
-      }
-      
-      // Handle specific network errors
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        this.isOffline = true;
-        return {
-          status: 'error',
-          error: 'Network error: Unable to connect to the backend server. Please check your internet connection and try again.',
-          offline: true,
-          retryAfter: 30
-        };
-      }
-      
-      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        this.isOffline = true;
-        return {
-          status: 'error',
-          error: 'Connection failed: The backend server is not accessible. Please try again later or contact support.',
-          offline: true,
-          retryAfter: 60
-        };
-      }
-      
-      return {
-        status: 'error',
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
-      };
     }
+    
+    return {
+      status: 'error',
+      error: 'Maximum retry attempts exceeded',
+    };
   }
 
   // Authentication
@@ -325,6 +370,46 @@ class ApiClient {
         localStorage.setItem('authToken', response.data.token);
         localStorage.setItem('userRole', response.data.user.role);
         localStorage.setItem('organizationId', response.data.user.organization_id?.toString() || '');
+      }
+    }
+
+    return response;
+  }
+
+  async signup(signupData: {
+    organizationName: string;
+    email: string;
+    password: string;
+    businessType: string;
+    businessCategory: string;
+  }): Promise<ApiResponse<LoginResponse>> {
+    const response = await this.request<LoginResponse>('/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify({
+        organization: {
+          name: signupData.organizationName,
+          tier: 'Basic',
+          subscription_start: new Date().toISOString().split('T')[0],
+          subscription_end: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        },
+        user: {
+          email: signupData.email,
+          password: signupData.password,
+          role: 'SuperAdmin',
+        },
+        business_type: signupData.businessType,
+        business_category: signupData.businessCategory,
+      }),
+    });
+
+    if (response.status === 'success' && response.data?.token) {
+      this.token = response.data.token;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('authToken', response.data.token);
+        localStorage.setItem('userRole', response.data.user.role);
+        localStorage.setItem('organizationId', response.data.user.organization_id?.toString() || '');
+        localStorage.setItem('businessType', signupData.businessType);
+        localStorage.setItem('organizationName', signupData.organizationName);
       }
     }
 

@@ -98,6 +98,10 @@ export function usePlatformLogin() {
   return useApi(apiClient.platformLogin.bind(apiClient));
 }
 
+export function useSignup() {
+  return useApi(apiClient.signup.bind(apiClient));
+}
+
 export function useOrganizations() {
   return useApi(apiClient.getOrganizations.bind(apiClient));
 }
