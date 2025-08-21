@@ -24,6 +24,9 @@ export default function LoginPage() {
   // API hooks
   const loginHook = useLogin();
   const platformLoginHook = usePlatformLogin();
+  
+  // Network status
+  const [networkStatus, setNetworkStatus] = useState<'checking' | 'online' | 'offline'>('checking');
 
   // Handle login based on portal type
   const handleLogin = async (e: React.FormEvent) => {
@@ -93,6 +96,23 @@ export default function LoginPage() {
   // Show loading state
   const isLoading = loginHook.loading || platformLoginHook.loading;
 
+  // Check network status on mount
+  useEffect(() => {
+    const checkNetworkStatus = async () => {
+      try {
+        const response = await fetch('https://genzura.aphezis.com/health', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        setNetworkStatus(response.ok ? 'online' : 'offline');
+      } catch (error) {
+        setNetworkStatus('offline');
+      }
+    };
+    
+    checkNetworkStatus();
+  }, []);
+
   // Toggle debug mode (hold Ctrl+Shift+D)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -123,6 +143,24 @@ export default function LoginPage() {
               <span className="text-sm text-yellow-800 font-medium">Platform Administrator</span>
             </div>
           )}
+
+          {/* Network Status Indicator */}
+          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
+            networkStatus === 'online' 
+              ? 'bg-green-50 border border-green-200' 
+              : networkStatus === 'offline'
+              ? 'bg-red-50 border border-red-200'
+              : 'bg-yellow-50 border border-yellow-200'
+          }`}>
+            <div className={`w-2 h-2 rounded-full ${
+              networkStatus === 'online' ? 'bg-green-500' : networkStatus === 'offline' ? 'bg-red-500' : 'bg-yellow-500'
+            }`} />
+            <span className={`text-sm font-medium ${
+              networkStatus === 'online' ? 'text-green-800' : networkStatus === 'offline' ? 'text-red-800' : 'text-yellow-800'
+            }`}>
+              {networkStatus === 'online' ? 'Backend Online' : networkStatus === 'offline' ? 'Backend Offline' : 'Checking Connection...'}
+            </span>
+          </div>
 
           {/* Debug Mode Indicator */}
           {debugMode && (
@@ -245,6 +283,19 @@ export default function LoginPage() {
             💡 Hold Ctrl+Shift+D to toggle debug mode
           </p>
         </div>
+
+        {/* Backend Status Info */}
+        {networkStatus === 'offline' && (
+          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <h3 className="text-sm font-medium text-red-700 mb-2">⚠️ Backend Connection Issue</h3>
+            <div className="text-xs text-red-600 space-y-1">
+              <p>• The backend server is currently not accessible</p>
+              <p>• Please check your internet connection</p>
+              <p>• If the problem persists, contact support</p>
+              <p>• Visit <a href="/debug" className="underline">Debug Page</a> for more information</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

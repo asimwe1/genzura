@@ -116,10 +116,14 @@ class ApiClient {
     }
 
     try {
+      console.log(`Making API request to: ${url}`);
+      
       const response = await fetch(url, {
         ...options,
         headers,
       });
+
+      console.log(`Response status: ${response.status} ${response.statusText}`);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -168,6 +172,22 @@ class ApiClient {
       }
     } catch (error) {
       console.error('API request failed:', error);
+      
+      // Handle specific network errors
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        return {
+          status: 'error',
+          error: 'Network error: Unable to connect to the backend server. Please check your internet connection and try again.',
+        };
+      }
+      
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        return {
+          status: 'error',
+          error: 'Connection failed: The backend server is not accessible. Please try again later or contact support.',
+        };
+      }
+      
       return {
         status: 'error',
         error: error instanceof Error ? error.message : 'Unknown error occurred',

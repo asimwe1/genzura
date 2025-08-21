@@ -85,6 +85,7 @@ export function ServiceSidebar() {
         menuItems={menuItems}
         headerIcon={<Settings className="h-4 w-4 text-white bg-blue-600 rounded-lg p-1" />}
         headerTitle="Service System"
+        portalType="Service Portal"
         footer={
           <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-300">
             <CardContent className="p-4 text-center">
