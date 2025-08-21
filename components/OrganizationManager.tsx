@@ -14,7 +14,9 @@ import {
   useOrganizations, 
   useCreateOrganization, 
   useUpdateOrganization, 
-  useDeleteOrganization,
+  useDeleteOrganization
+} from '@/hooks/useApi';
+import {
   Organization,
   CreateOrganizationRequest,
   UpdateOrganizationRequest

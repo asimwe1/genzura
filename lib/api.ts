@@ -123,7 +123,7 @@ class ApiClient {
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout (1 minute)
       
       const response = await fetch(`${this.baseUrl}/health`, {
         method: 'GET',
@@ -195,7 +195,7 @@ class ApiClient {
         
         // Add timeout to the request
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout (1 minute)
         
         const response = await fetch(url, {
           ...options,
