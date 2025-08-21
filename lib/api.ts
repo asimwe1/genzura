@@ -6,6 +6,8 @@ export interface ApiResponse<T = any> {
   message?: string;
   error?: string;
   status: 'success' | 'error';
+  offline?: boolean;
+  retryAfter?: number;
 }
 
 export interface LoginRequest {
@@ -94,10 +96,68 @@ export interface UpdateEmployeeRequest extends Partial<CreateEmployeeRequest> {}
 class ApiClient {
   private baseUrl: string;
   private token: string | null;
+  private isOffline: boolean = false;
+  private lastOnlineCheck: number = 0;
+  private retryAttempts: number = 0;
+  private maxRetries: number = 3;
 
   constructor(baseUrl: string = 'https://genzura.aphezis.com') {
     this.baseUrl = baseUrl;
     this.token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+    
+    // Check online status on initialization
+    if (typeof window !== 'undefined') {
+      this.checkOnlineStatus();
+      // Listen for online/offline events
+      window.addEventListener('online', () => this.handleOnline());
+      window.addEventListener('offline', () => this.handleOffline());
+    }
+  }
+
+  private async checkOnlineStatus(): Promise<boolean> {
+    const now = Date.now();
+    // Only check every 30 seconds to avoid excessive requests
+    if (now - this.lastOnlineCheck < 30000) {
+      return !this.isOffline;
+    }
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+      
+      const response = await fetch(`${this.baseUrl}/health`, {
+        method: 'GET',
+        signal: controller.signal,
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        this.isOffline = false;
+        this.retryAttempts = 0;
+        this.lastOnlineCheck = now;
+        return true;
+      } else {
+        this.isOffline = true;
+        return false;
+      }
+    } catch (error) {
+      this.isOffline = true;
+      this.lastOnlineCheck = now;
+      return false;
+    }
+  }
+
+  private handleOnline(): void {
+    this.isOffline = false;
+    this.retryAttempts = 0;
+    console.log('Network connection restored');
+  }
+
+  private handleOffline(): void {
+    this.isOffline = true;
+    console.log('Network connection lost');
   }
 
   private async request<T>(
@@ -106,6 +166,19 @@ class ApiClient {
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
     
+    // Check if we're offline first
+    if (this.isOffline) {
+      const online = await this.checkOnlineStatus();
+      if (!online) {
+        return {
+          status: 'error',
+          error: 'You are currently offline. Please check your internet connection and try again.',
+          offline: true,
+          retryAfter: 30
+        };
+      }
+    }
+
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
       ...options.headers,
@@ -118,11 +191,17 @@ class ApiClient {
     try {
       console.log(`Making API request to: ${url}`);
       
+      // Add timeout to the request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
       const response = await fetch(url, {
         ...options,
         headers,
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
       console.log(`Response status: ${response.status} ${response.statusText}`);
 
       if (!response.ok) {
@@ -137,6 +216,10 @@ class ApiClient {
 
       const data = await response.json();
       console.log('Backend response data:', data);
+      
+      // Reset offline status on successful request
+      this.isOffline = false;
+      this.retryAttempts = 0;
       
       // Check if the response has the expected structure
       if (data.token && data.user) {
@@ -173,18 +256,35 @@ class ApiClient {
     } catch (error) {
       console.error('API request failed:', error);
       
+      // Handle timeout errors
+      if (error instanceof Error && error.name === 'AbortError') {
+        this.isOffline = true;
+        return {
+          status: 'error',
+          error: 'Request timeout: The server took too long to respond. Please try again.',
+          offline: true,
+          retryAfter: 15
+        };
+      }
+      
       // Handle specific network errors
       if (error instanceof TypeError && error.message.includes('fetch')) {
+        this.isOffline = true;
         return {
           status: 'error',
           error: 'Network error: Unable to connect to the backend server. Please check your internet connection and try again.',
+          offline: true,
+          retryAfter: 30
         };
       }
       
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        this.isOffline = true;
         return {
           status: 'error',
           error: 'Connection failed: The backend server is not accessible. Please try again later or contact support.',
+          offline: true,
+          retryAfter: 60
         };
       }
       
@@ -430,6 +530,17 @@ class ApiClient {
   // Health Check
   async healthCheck(): Promise<ApiResponse<{ status: string; timestamp: string; version?: string }>> {
     return this.request<{ status: string; timestamp: string; version?: string }>('/health');
+  }
+
+  // Get current offline status
+  getOfflineStatus(): boolean {
+    return this.isOffline;
+  }
+
+  // Force check online status
+  async forceCheckOnline(): Promise<boolean> {
+    this.lastOnlineCheck = 0;
+    return await this.checkOnlineStatus();
   }
 }
 

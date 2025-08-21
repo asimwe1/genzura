@@ -27,66 +27,10 @@ export default function LoginPage() {
   
   // Network status
   const [networkStatus, setNetworkStatus] = useState<'checking' | 'online' | 'offline'>('checking');
+  const [retryCount, setRetryCount] = useState(0);
+  const [lastError, setLastError] = useState<string | null>(null);
 
-  // Handle login based on portal type
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Clear any previous errors
-    loginHook.reset();
-    platformLoginHook.reset();
-    
-    if (!email || !password) {
-      toast.error("Please fill in all fields");
-      return;
-    }
 
-    // Validate credentials before sending to backend
-    const validation = apiClient.validateCredentials(email, password);
-    if (!validation.isValid) {
-      toast.error(validation.error || "Invalid credentials");
-      return;
-    }
-
-    try {
-      let response;
-      
-      if (isPlatformAdmin) {
-        console.log("Attempting platform admin login...");
-        response = await platformLoginHook.execute({ email, password });
-      } else {
-        console.log("Attempting organization user login...");
-        response = await loginHook.execute({ email, password });
-      }
-
-      console.log("Login response:", response);
-
-      if (response?.status === 'success' && response.data?.token) {
-        // Store authentication data
-        localStorage.setItem("isAuth", "true");
-        localStorage.setItem("userPortal", portalType);
-        localStorage.setItem("userEmail", email);
-        localStorage.setItem("userRole", response.data.user.role);
-        
-        if (response.data.user.organization_id) {
-          localStorage.setItem("organizationId", response.data.user.organization_id.toString());
-        }
-
-        toast.success("Login successful!");
-        
-        // Redirect based on portal type
-        const redirectPath = portalType === "service" ? "/service" : "/product";
-        router.push(redirectPath);
-      } else {
-        const errorMessage = response?.error || "Login failed. Please check your credentials.";
-        toast.error(errorMessage);
-        console.error("Login failed:", response);
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      toast.error("An error occurred during login. Please try again.");
-    }
-  };
 
   // Check if user is platform admin based on email
   useEffect(() => {
@@ -103,15 +47,110 @@ export default function LoginPage() {
         const response = await fetch('https://genzura.aphezis.com/health', {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
+          signal: AbortSignal.timeout(5000) // 5 second timeout
         });
         setNetworkStatus(response.ok ? 'online' : 'offline');
       } catch (error) {
         setNetworkStatus('offline');
+        console.error('Network check failed:', error);
       }
     };
     
     checkNetworkStatus();
+    
+    // Set up periodic network checks
+    const interval = setInterval(checkNetworkStatus, 30000); // Check every 30 seconds
+    return () => clearInterval(interval);
   }, []);
+
+  // Handle retry connection
+  const handleRetryConnection = async () => {
+    setNetworkStatus('checking');
+    setRetryCount(prev => prev + 1);
+    
+    try {
+      const response = await fetch('https://genzura.aphezis.com/health', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        signal: AbortSignal.timeout(5000)
+      });
+      
+      if (response.ok) {
+        setNetworkStatus('online');
+        setLastError(null);
+        toast.success('Backend connection restored!');
+      } else {
+        setNetworkStatus('offline');
+        setLastError('Backend server error');
+      }
+    } catch (error) {
+      setNetworkStatus('offline');
+      setLastError('Connection timeout');
+      toast.error('Still unable to connect to backend');
+    }
+  };
+
+  // Handle login with better error handling
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (networkStatus === 'offline') {
+      toast.error('Cannot login while offline. Please check your connection and try again.');
+      return;
+    }
+
+    if (!email || !password) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+
+    // Clear any previous errors
+    loginHook.reset();
+    platformLoginHook.reset();
+    setLastError(null);
+
+    try {
+      let response;
+      
+      if (isPlatformAdmin) {
+        response = await platformLoginHook.execute({ email, password });
+      } else {
+        response = await loginHook.execute({ email, password });
+      }
+      
+      if (response?.status === 'success' && response.data?.token) {
+        // Store token
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('authToken', response.data.token);
+          localStorage.setItem('userRole', response.data.user.role);
+          localStorage.setItem('businessType', portalType);
+        }
+        
+        toast.success(`Welcome back! Redirecting to ${portalType}...`);
+        
+        // Redirect based on portal type
+        if (isPlatformAdmin) {
+          router.push('/platform');
+        } else {
+          router.push('/product');
+        }
+      } else {
+        const errorMsg = response?.error || 'Login failed. Please check your credentials.';
+        setLastError(errorMsg);
+        
+        if (response?.offline) {
+          toast.error('Backend is currently offline. Please try again later.');
+        } else {
+          toast.error(errorMsg);
+        }
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      const errorMsg = error instanceof Error ? error.message : 'An unexpected error occurred';
+      setLastError(errorMsg);
+      toast.error('Login failed. Please try again.');
+    }
+  };
 
   // Toggle debug mode (hold Ctrl+Shift+D)
   useEffect(() => {
@@ -145,21 +184,35 @@ export default function LoginPage() {
           )}
 
           {/* Network Status Indicator */}
-          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
+          <div className={`flex items-center justify-between px-3 py-2 rounded-lg ${
             networkStatus === 'online' 
               ? 'bg-green-50 border border-green-200' 
               : networkStatus === 'offline'
               ? 'bg-red-50 border border-red-200'
               : 'bg-yellow-50 border border-yellow-200'
           }`}>
-            <div className={`w-2 h-2 rounded-full ${
-              networkStatus === 'online' ? 'bg-green-500' : networkStatus === 'offline' ? 'bg-red-500' : 'bg-yellow-500'
-            }`} />
-            <span className={`text-sm font-medium ${
-              networkStatus === 'online' ? 'text-green-800' : networkStatus === 'offline' ? 'text-red-800' : 'text-yellow-800'
-            }`}>
-              {networkStatus === 'online' ? 'Backend Online' : networkStatus === 'offline' ? 'Backend Offline' : 'Checking Connection...'}
-            </span>
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${
+                networkStatus === 'online' ? 'bg-green-500' : networkStatus === 'offline' ? 'bg-red-500' : 'bg-yellow-500'
+              }`} />
+              <span className={`text-sm font-medium ${
+                networkStatus === 'online' ? 'text-green-800' : networkStatus === 'offline' ? 'text-red-800' : 'text-yellow-800'
+              }`}>
+                {networkStatus === 'online' ? 'Backend Online' : networkStatus === 'offline' ? 'Backend Offline' : 'Checking Connection...'}
+              </span>
+            </div>
+            
+            {networkStatus === 'offline' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRetryConnection}
+                disabled={networkStatus === 'checking'}
+                className="text-xs h-7 px-2"
+              >
+                {networkStatus === 'checking' ? 'Retrying...' : `Retry (${retryCount})`}
+              </Button>
+            )}
           </div>
 
           {/* Debug Mode Indicator */}
@@ -271,6 +324,26 @@ export default function LoginPage() {
             </Link>
           </p>
         </div>
+
+        {/* Connection Error Display */}
+        {lastError && networkStatus === 'offline' && (
+          <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <h4 className="text-sm font-medium text-red-800 mb-2">Connection Issue</h4>
+                <p className="text-sm text-red-700 mb-3">
+                  {lastError}
+                </p>
+                <div className="flex items-center gap-2 text-xs text-red-600">
+                  <span>Retry attempts: {retryCount}</span>
+                  <span>•</span>
+                  <span>Last check: {new Date().toLocaleTimeString()}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Demo Credentials Info */}
         <div className="mt-8 p-4 bg-gray-50 rounded-lg">
