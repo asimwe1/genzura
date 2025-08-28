@@ -8,8 +8,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Link from "next/link";
 import AuthForm from "@/components/ui/AuthForm";
-import { Package, Settings, Box, Car, ShoppingCart, Building2, MoreHorizontal } from "lucide-react";
+import { Package, Settings, Box, Car, ShoppingCart, Building2, MoreHorizontal, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { useSignup } from "@/hooks/useApi";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function SignupPage() {
   const [organizationName, setOrganizationName] = useState("");
@@ -19,32 +22,76 @@ export default function SignupPage() {
   const [businessType, setBusinessType] = useState("product");
   const [businessCategory, setBusinessCategory] = useState("inventory");
   const [customCategory, setCustomCategory] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const handleSignup = (e: React.FormEvent) => {
+  const [signupStatus, setSignupStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [signupMessage, setSignupMessage] = useState<string>('');
+  
+  const router = useRouter();
+  const signupHook = useSignup();
+
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Reset previous status
+    setSignupStatus('loading');
+    setSignupMessage('');
+    
+    // Validation
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
+      setSignupStatus('error');
+      setSignupMessage('Passwords do not match');
+      toast.error('Passwords do not match');
       return;
     }
+    
     if (password.length < 6) {
-      alert("Password must be at least 6 characters");
+      setSignupStatus('error');
+      setSignupMessage('Password must be at least 6 characters');
+      toast.error('Password must be at least 6 characters');
       return;
     }
+    
     if (businessCategory === "other" && !customCategory.trim()) {
-      alert("Please specify your service or product");
+      setSignupStatus('error');
+      setSignupMessage('Please specify your service or product');
+      toast.error('Please specify your service or product');
       return;
     }
-    setIsLoading(true);
-    setTimeout(() => {
-      localStorage.setItem("isAuth", "true");
-      localStorage.setItem("userEmail", email);
-      localStorage.setItem("organizationName", organizationName);
-      localStorage.setItem("businessType", businessType);
-      localStorage.setItem("businessCategory", businessCategory === "other" ? customCategory : businessCategory);
-      setIsLoading(false);
-      setShowSuccess(true);
-    }, 1000);
+
+    try {
+      const finalCategory = businessCategory === "other" ? customCategory : businessCategory;
+      
+      const response = await signupHook.execute({
+        organizationName,
+        email,
+        password,
+        businessType,
+        businessCategory: finalCategory,
+      });
+
+      if (response?.status === 'success' && response.data?.token) {
+        setSignupStatus('success');
+        setSignupMessage('Account created successfully! Redirecting to your portal...');
+        toast.success('Account created successfully!');
+        setShowSuccess(true);
+        
+        // Redirect after a short delay
+        setTimeout(() => {
+          router.push(businessType === "service" ? "/service" : "/product");
+        }, 2000);
+      } else {
+        const errorMsg = response?.error || 'Signup failed. Please try again.';
+        setSignupStatus('error');
+        setSignupMessage(errorMsg);
+        toast.error(errorMsg);
+      }
+    } catch (error) {
+      console.error('Signup error:', error);
+      const errorMsg = error instanceof Error ? error.message : 'An unexpected error occurred';
+      setSignupStatus('error');
+      setSignupMessage(errorMsg);
+      toast.error('Signup failed. Please try again.');
+    }
   };
   const productCategories = [
     { value: "inventory", label: "Inventory Management", icon: Box },
@@ -76,11 +123,13 @@ export default function SignupPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6 pb-10 px-6">
-          <AuthForm
-            mode="signup"
-            onSubmit={handleSignup}
-            loading={isLoading}
-            fields={[
+                  <AuthForm
+          mode="signup"
+          onSubmit={handleSignup}
+          loading={signupStatus === 'loading'}
+          error={signupStatus === 'error' ? signupMessage : undefined}
+          success={signupStatus === 'success' ? signupMessage : undefined}
+          fields={[
               {
                 name: "organizationName",
                 label: "Organization Name *",

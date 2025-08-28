@@ -13,6 +13,7 @@ import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, CartesianGrid, BarC
 import { Skeleton } from "@/components/ui/skeleton"
 import { useState, useEffect } from "react"
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import OfflineBanner from "@/components/OfflineBanner"
 
 export default function ServicePortal() {
   const router = useRouter()
@@ -69,8 +70,10 @@ export default function ServicePortal() {
   ]
 
   return (
-    <TooltipProvider>
-      <div className="flex-1 space-y-3 p-2 sm:p-4 md:pr-8 lg:pr-12 xl:pr-8 xl:pl-8 md:pt-4 pt-2">
+    <>
+      <OfflineBanner portalType="Service Portal" />
+      <TooltipProvider>
+        <div className="flex-1 space-y-3 p-2 sm:p-4 md:pr-8 lg:pr-12 xl:pr-8 xl:pl-8 md:pt-4 pt-2">
         {/* Header - Responsive */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           {/* Search Bar */}
@@ -448,6 +451,7 @@ export default function ServicePortal() {
           </div>
         </div>
       </div>
-    </TooltipProvider>
-  )
+        </TooltipProvider>
+      </>
+    )
 } 
