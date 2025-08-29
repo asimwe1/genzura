@@ -70,6 +70,19 @@ export default function SignupPage() {
       });
 
       if (response?.status === 'success' && response.data?.token) {
+        // Store authentication data
+        if (typeof window !== "undefined") {
+          localStorage.setItem("authToken", response.data.token);
+          localStorage.setItem("userRole", response.data.user?.role || "SuperAdmin");
+          localStorage.setItem("businessType", businessType);
+          localStorage.setItem("businessCategory", finalCategory);
+          localStorage.setItem("organizationName", organizationName);
+          localStorage.setItem("isAuth", "true"); // This is what AuthGuard checks for!
+          if (response.data.user?.organization_id) {
+            localStorage.setItem("organizationId", response.data.user.organization_id.toString());
+          }
+        }
+
         setSignupStatus('success');
         setSignupMessage('Account created successfully! Redirecting to your portal...');
         toast.success('Account created successfully!');
