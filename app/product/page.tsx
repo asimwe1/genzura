@@ -102,13 +102,60 @@ export default function ProductPortal() {
     { title: "Supplier Meeting", time: "Nov 21, 12:00 PM" },
     { title: "Update Stock Levels", time: "Nov 22, 8:00 AM" },
     { title: "Generate Monthly Report", time: "Nov 23, 11:00 AM" },
-  ]
+  ];
 
-  const teamMembers = [
-    { name: "John", avatar: "/placeholder.svg?height=32&width=32" },
-    { name: "Sarah", avatar: "/placeholder.svg?height=32&width=32" },
-    { name: "Mike", avatar: "/placeholder.svg?height=32&width=32" },
-  ]
+  const [teamMembers, setTeamMembers] = useState<{ name: string, avatar: string }[]>([]);
+
+  useEffect(() => {
+    let token = localStorage.getItem("token");
+    if (!token) {
+      console.warn("No token found in localStorage");
+      return;
+    }
+    token = token.trim();
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://genzura.aphezis.com";
+    // Remove trailing slashes from baseUrl
+    const employeesUrl = baseUrl.replace(/\/+$/, "") + "/employees";
+    // Debug log
+    console.log("Fetching employees from:", employeesUrl);
+    console.log("Authorization header:", `Bearer ${token}`);
+    fetch(employeesUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+    })
+      .then(res => {
+        console.log("Employees API status:", res.status);
+        if (!res.ok) {
+          console.error("Failed to fetch employees:", res.status, res.statusText);
+        }
+        return res.json();
+      })
+      .then(data => {
+        console.log("Employees API response:", data);
+        console.log("Employees data structure:", data.data || data);
+        
+        const employees = data.data || data;
+        const members = Array.isArray(employees)
+          ? employees.slice(0, 5).map((emp: any) => {
+              const fullName = `${emp.first_name || ''} ${emp.last_name || ''}`.trim();
+              console.log("Processing employee:", emp, "Full name:", fullName);
+              return {
+                name: fullName || "Unknown Employee",
+                avatar: emp.avatar || "/placeholder.svg?height=32&width=32"
+              };
+            })
+          : [];
+        
+        console.log("Final team members:", members);
+        setTeamMembers(members);
+      })
+      .catch(err => {
+        console.error("Error fetching employees:", err);
+      });
+  }, []);
 
   return (
     <>
@@ -593,15 +640,21 @@ export default function ProductPortal() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {teamMembers.map((member, index) => (
-                    <div key={index} className="flex items-center space-x-3">
-                      <Avatar className="w-8 h-8">
-                        <AvatarImage src={member.avatar} />
-                        <AvatarFallback>{member.name[0]}</AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm font-medium">{member.name}</span>
+                  {teamMembers.length > 0 ? (
+                    teamMembers.map((member, index) => (
+                      <div key={index} className="flex items-center space-x-3">
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={member.avatar} />
+                          <AvatarFallback>{member.name.charAt(0).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm font-medium">{member.name}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-4">
+                      <div className="text-gray-400 text-sm">Loading team members...</div>
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>

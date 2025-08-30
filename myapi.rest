@@ -1,0 +1,523 @@
+# Genzura Backend API Testing
+# Use VS Code REST Client extension to run these requests
+# Make sure the server is running: cargo run
+
+# 
+# @baseUrl= http://localhost:3000
+@baseUrl = https://genzura.aphezis.com
+@contentType = application/json
+
+### Variables for tokens (will be set after login)
+# Note: These tokens need to be regenerated with integer IDs after server restart
+@platformToken = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZSI6ImFkbWluQGdlbnp1cmEuY29tIiwiciI6InBhIiwib3JnIjpudWxsLCJiIjpudWxsLCJleHAiOjE3NTY0ODY1MzZ9.70i2up54CM4Ga_0Ks1NAM-ZSs2vChjH8HLWbCr5xgmQ
+@orgToken = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZSI6ImpvaG4uZG9lQGRlbW9jb21wYW55LmNvbSIsInIiOiJzYSIsIm9yZyI6IjEiLCJiIjpudWxsLCJleHAiOjE3NTY2Mzk4NDN9.OKx6m4heeJkjwgQDLCBnMBkBlNRM2CsD_A_D5Bo0Iq0
+# Sample organization and branch IDs (replace with actual values from your database)
+@orgId = 56
+@branchId = 1
+@employeeId = 1
+
+###############################################
+# AUTHENTICATION ENDPOINTS
+###############################################
+
+### Platform Admin Login
+POST {{baseUrl}}/auth/platform/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@genzura.com",
+  "password": "admin123"
+}
+
+### Organization User Login
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "john.doe@democompany.com",
+  "password": "user123"
+}
+
+###############################################
+# ORGANIZATION MANAGEMENT (Platform Admin)
+###############################################
+
+### Create Organization (Platform Admin Required)
+# First login as platform admin and copy the token to @platformToken variable above
+POST {{baseUrl}}/organizations
+Content-Type: {{contentType}}
+Authorization: Bearer {{platformToken}}
+
+{
+  "name": "Text Now",
+  "tier": "Pro",
+  "email": "tnow7543@gmail.com",
+  "phone": "+1-555-0100",
+  "address": "123 Music Lane, Los Angeles, CA",
+  "business_type": "Music",
+  "tax_number": "123-456-789",
+  "subscription_start": "2025-01-01",
+  "subscription_end": "2025-12-31"
+}
+
+### Register Organization
+POST http://localhost:8000/api/organization/register
+Content-Type: application/json
+
+{
+  "organization_name": "TestOrg",
+  "user_email": "user@example.com",
+  "user_password": "supersecret"
+}
+
+### List All Organizations (Platform Admin Required)
+GET {{baseUrl}}/organizations
+Authorization: Bearer {{platformToken}}
+
+### Get Organization by ID (Platform Admin Required)
+GET {{baseUrl}}/organizations/{{orgId}}
+Authorization: Bearer {{platformToken}}
+
+### Update Organization (Platform Admin Required)
+PUT {{baseUrl}}/organizations/{{orgId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{platformToken}}
+
+{
+  "name": "TEXT NOW",
+  "tier": "Pro",
+  "email" : "tnow7543@gmail.com",
+  "phone": "+1-555-0101",
+  "subscription_start": "2025-01-01",
+  "subscription_end": "2025-06-30"
+}
+
+### Delete Organization (Platform Admin Required)
+DELETE {{baseUrl}}/organizations/{{orgId}}
+Authorization: Bearer {{platformToken}}
+
+###############################################
+# ORGANIZATION ACCESS (Organization Users)
+###############################################
+
+### List Organizations (Organization User - sees only their org)
+GET {{baseUrl}}/organizations
+Authorization: Bearer {{orgToken}}
+
+### Get Own Organization Details
+GET {{baseUrl}}/organizations/{{orgId}}
+Authorization: Bearer {{orgToken}}
+
+###############################################
+# BRANCHES MANAGEMENT (Organization Users)
+###############################################
+
+### Create Branch (SuperAdmin/BranchAdmin Required)
+POST {{baseUrl}}/branches
+Content-Type: {{contentType}}
+Authorization: Bearer {{orgToken}}
+
+{
+  "name": "Technology Hub",
+  "location": "Silicon Valley",
+  "phone": "+1-555-0102",
+  "email": "tech@democompany.com"
+}
+
+### Create Branch with Manager (Manager must have BranchAdmin role)
+POST {{baseUrl}}/branches
+Content-Type: {{contentType}}
+Authorization: Bearer {{orgToken}}
+
+{
+  "name": "Sales Branch",
+  "location": "New York",
+  "phone": "+1-555-0150",
+  "email": "sales@democompany.com",
+  "manager_id": {{employeeId}}
+}
+
+### List All Branches (Organization Users)
+GET {{baseUrl}}/branches
+Authorization: Bearer {{orgToken}}
+
+### List Branches with Pagination
+GET {{baseUrl}}/branches?limit=10&offset=0
+Authorization: Bearer {{orgToken}}
+
+### Get Branch by ID
+GET {{baseUrl}}/branches/{{branchId}}
+Authorization: Bearer {{orgToken}}
+
+### Update Branch (SuperAdmin/BranchAdmin Required)
+PUT {{baseUrl}}/branches/{{branchId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{orgToken}}
+
+{
+  "name": "Updated Tech Hub",
+  "location": "San Francisco",
+  "phone": "+1-555-0199",
+  "email": "updatedhub@democompany.com"
+}
+
+### Update Branch Manager (Validates BranchAdmin role)
+PUT {{baseUrl}}/branches/{{branchId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{orgToken}}
+
+{
+  "manager_id": {{employeeId}}
+}
+
+### Delete Branch (SuperAdmin/BranchAdmin Required)
+DELETE {{baseUrl}}/branches/{{branchId}}
+Authorization: Bearer {{orgToken}}
+
+### Test Branch Access with Platform Admin (Should Fail)
+GET {{baseUrl}}/branches
+Authorization: Bearer {{platformToken}}
+# Expected: 403 Forbidden - Platform admins cannot access organization branches
+
+###############################################
+# EMPLOYEES MANAGEMENT (Organization Users)
+###############################################
+
+### Create Employee (SuperAdmin/BranchAdmin Required)
+POST {{baseUrl}}/employees
+Content-Type: {{contentType}}
+Authorization: Bearer {{orgToken}}
+
+{
+  "first_name": "Alice",
+  "last_name": "Johnson",
+  "email": "alice.johnson@democompany.com",
+  "phone": "+1-555-0123",
+  "job_title": "Software Developer",
+  "basic_salary": "75000.00",
+  "hire_date": "2025-01-15"
+}
+
+### Create Employee with Branch Assignment
+POST {{baseUrl}}/employees
+Content-Type: {{contentType}}
+Authorization: Bearer {{orgToken}}
+
+{
+  "branch_id": {{branchId}},
+  "first_name": "Bob",
+  "last_name": "Smith", 
+  "email": "bob.smith@democompany.com",
+  "phone": "+1-555-0124",
+  "job_title": "Sales Manager",
+  "basic_salary": "65000.00",
+  "hire_date": "2025-01-20"
+}
+
+### List All Employees (Organization Users)
+GET {{baseUrl}}/employees
+Authorization: Bearer {{orgToken}}
+
+### List Employees with Pagination
+GET {{baseUrl}}/employees?limit=10&offset=0
+Authorization: Bearer {{orgToken}}
+
+### List Employees by Branch
+GET {{baseUrl}}/employees?branch_id={{branchId}}
+Authorization: Bearer {{orgToken}}
+
+### Get Employee by ID
+GET {{baseUrl}}/employees/{{employeeId}}
+Authorization: Bearer {{orgToken}}
+
+### Update Employee (SuperAdmin/BranchAdmin Required)
+PUT {{baseUrl}}/employees/{{employeeId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{orgToken}}
+
+{
+  "first_name": "Alice",
+  "last_name": "Johnson-Updated",
+  "email": "alice.updated@democompany.com",
+  "job_title": "Senior Software Developer",
+  "basic_salary": "85000.00"
+}
+
+### Update Employee Status
+PUT {{baseUrl}}/employees/{{employeeId}}
+Content-Type: {{contentType}}
+Authorization: Bearer {{orgToken}}
+
+{
+  "status": "inactive"
+}
+
+### Delete Employee (SuperAdmin/BranchAdmin Required)
+DELETE {{baseUrl}}/employees/{{employeeId}}
+Authorization: Bearer {{orgToken}}
+
+### Get Branch Employees
+GET {{baseUrl}}/branches/{{branchId}}/employees
+Authorization: Bearer {{orgToken}}
+
+### Test Employee Access with Platform Admin (Should Fail)
+GET {{baseUrl}}/employees
+Authorization: Bearer {{platformToken}}
+# Expected: 403 Forbidden - Platform admins cannot access organization employees
+
+###############################################
+# FUTURE ENDPOINTS (To be implemented)
+###############################################
+
+### Branches Management
+# GET {{baseUrl}}/branches
+# POST {{baseUrl}}/branches
+# GET {{baseUrl}}/branches/:id
+# PUT {{baseUrl}}/branches/:id
+# DELETE {{baseUrl}}/branches/:id
+
+### Users Management
+# GET {{baseUrl}}/users
+# POST {{baseUrl}}/users
+# GET {{baseUrl}}/users/:id
+# PUT {{baseUrl}}/users/:id
+# DELETE {{baseUrl}}/users/:id
+# PUT {{baseUrl}}/users/:id/password
+
+### Employees Management
+# GET {{baseUrl}}/employees
+# POST {{baseUrl}}/employees
+# GET {{baseUrl}}/employees/:id
+# PUT {{baseUrl}}/employees/:id
+# DELETE {{baseUrl}}/employees/:id
+
+### Sales Management
+# GET {{baseUrl}}/sales
+# POST {{baseUrl}}/sales
+# GET {{baseUrl}}/sales/:id
+# PUT {{baseUrl}}/sales/:id
+# DELETE {{baseUrl}}/sales/:id
+# GET {{baseUrl}}/sales/:id/items
+# POST {{baseUrl}}/sales/:id/items
+# PUT {{baseUrl}}/sales/:sale_id/items/:item_id
+# DELETE {{baseUrl}}/sales/:sale_id/items/:item_id
+
+### Sales Payments
+# GET {{baseUrl}}/sales/:id/payments
+# POST {{baseUrl}}/sales/:id/payments
+# PUT {{baseUrl}}/sales/:sale_id/payments/:payment_id
+# DELETE {{baseUrl}}/sales/:sale_id/payments/:payment_id
+
+### Purchases Management
+# GET {{baseUrl}}/purchases
+# POST {{baseUrl}}/purchases
+# GET {{baseUrl}}/purchases/:id
+# PUT {{baseUrl}}/purchases/:id
+# DELETE {{baseUrl}}/purchases/:id
+# GET {{baseUrl}}/purchases/:id/items
+# POST {{baseUrl}}/purchases/:id/items
+
+### Payroll Management
+# GET {{baseUrl}}/payroll
+# POST {{baseUrl}}/payroll
+# GET {{baseUrl}}/payroll/:id
+# PUT {{baseUrl}}/payroll/:id
+# DELETE {{baseUrl}}/payroll/:id
+
+### Employee Deductions
+# GET {{baseUrl}}/employees/:id/deductions
+# POST {{baseUrl}}/employees/:id/deductions
+# PUT {{baseUrl}}/deductions/:id
+# DELETE {{baseUrl}}/deductions/:id
+
+### Employee Bonuses
+# GET {{baseUrl}}/employees/:id/bonuses
+# POST {{baseUrl}}/employees/:id/bonuses
+# PUT {{baseUrl}}/bonuses/:id
+# DELETE {{baseUrl}}/bonuses/:id
+
+### Expenses Management
+# GET {{baseUrl}}/expenses
+# POST {{baseUrl}}/expenses
+# GET {{baseUrl}}/expenses/:id
+# PUT {{baseUrl}}/expenses/:id
+# DELETE {{baseUrl}}/expenses/:id
+
+### Taxes Management
+# GET {{baseUrl}}/taxes
+# POST {{baseUrl}}/taxes
+# GET {{baseUrl}}/taxes/:id
+# PUT {{baseUrl}}/taxes/:id
+# DELETE {{baseUrl}}/taxes/:id
+
+### Profits Reporting
+# GET {{baseUrl}}/profits
+# GET {{baseUrl}}/profits/summary
+# GET {{baseUrl}}/profits/by-period?start=2025-01-01&end=2025-12-31
+# GET {{baseUrl}}/profits/by-branch/:branch_id
+
+###############################################
+# SAMPLE TEST SCENARIOS
+###############################################
+
+### Test Scenario 1: Platform Admin Workflow
+# 1. Login as platform admin
+# 2. Create a new organization
+# 3. List all organizations
+# 4. Update the organization
+# 5. Get organization details
+
+### Test Scenario 2: Organization User Workflow
+# 1. Login as organization user
+# 2. View own organization details
+# 3. Try to access other organizations (should fail)
+
+### Test Scenario 3: Branch Management Workflow
+# 1. Login as SuperAdmin
+# 2. Create a branch without manager
+# 3. Create a branch with manager (requires BranchAdmin user)
+# 4. List all branches
+# 5. Update branch details
+# 6. Delete a branch
+
+### Test Scenario 4: Role-based Access Testing
+# 1. Login with different user roles
+# 2. Test access to various endpoints
+# 3. Verify proper authorization
+# 4. Test cross-organization access (should fail)
+
+### Test Scenario 5: Branch Manager Validation
+# 1. Create user with User role
+# 2. Try to assign as branch manager (should fail)
+# 3. Update user role to BranchAdmin
+# 4. Successfully assign as branch manager
+
+### Test Scenario 6: Complete Branch CRUD
+# 1. POST /branches - Create with all fields
+# 2. GET /branches - List and verify creation
+# 3. GET /branches/:id - Get specific branch
+# 4. PUT /branches/:id - Update with new data
+# 5. DELETE /branches/:id - Remove branch
+# 6. GET /branches - Verify deletion
+
+###############################################
+# ERROR TESTING
+###############################################
+
+### Test Invalid Login
+POST {{baseUrl}}/auth/platform/login
+Content-Type: {{contentType}}
+
+{
+  "email": "invalid@email.com",
+  "password": "wrongpassword"
+}
+
+### Test Unauthorized Access
+GET {{baseUrl}}/organizations
+# No Authorization header - should return 401
+
+### Test Invalid Token
+GET {{baseUrl}}/organizations
+Authorization: Bearer invalid.token.here
+
+### Test Missing Required Fields in Organization
+POST {{baseUrl}}/organizations
+Content-Type: {{contentType}}
+Authorization: Bearer {{platformToken}}
+
+{
+  "name": "Incomplete Organization"
+  // Missing required fields like tier, subscription dates
+}
+
+### Test Missing Required Fields in Branch
+POST {{baseUrl}}/branches
+Content-Type: {{contentType}}
+Authorization: Bearer {{orgToken}}
+
+{
+  "location": "Some Location"
+  // Missing required name field
+}
+
+### Test Invalid Email in Branch
+POST {{baseUrl}}/branches
+Content-Type: {{contentType}}
+Authorization: Bearer {{orgToken}}
+
+{
+  "name": "Test Branch",
+  "email": "invalid-email-format"
+}
+
+### Test Invalid Manager Role (Should Fail)
+POST {{baseUrl}}/branches
+Content-Type: {{contentType}}
+Authorization: Bearer {{orgToken}}
+
+{
+  "name": "Test Branch",
+  "manager_id": "33333333-3333-3333-3333-333333333333"
+  // This user has regular User role, not BranchAdmin
+}
+
+### Test Access with Insufficient Permissions
+POST {{baseUrl}}/branches
+Content-Type: {{contentType}}
+Authorization: Bearer {{orgToken}}
+# If orgToken user has only User role, this should fail
+
+{
+  "name": "Unauthorized Branch"
+}
+
+###############################################
+# HEALTH CHECK & INFO
+###############################################
+
+### Health Check (if implemented)
+# GET {{baseUrl}}/health
+
+### API Info (if implemented)
+# GET {{baseUrl}}/info
+
+### API Version (if implemented)
+# GET {{baseUrl}}/version
+
+###############################################
+# INSTRUCTIONS
+###############################################
+
+# HOW TO USE THIS FILE WITH INTEGER IDs:
+# 
+# 1. Install VS Code REST Client extension
+# 2. Start the Genzura backend server: cargo run
+# 3. Load sample data: mysql -u sadeny -p genzura_dbx < sample_data.sql
+# 4. Get actual integer IDs by running the test script: ./quick_test_int_ids.sh
+# 5. Update the variables at the top of this file with real IDs:
+#    - Replace @orgId = 1 with actual organization ID
+#    - Replace @branchId = 1 with actual branch ID  
+#    - Replace @employeeId = 1 with actual employee ID
+# 6. Login to get fresh tokens:
+#    a. Run the platform login request to get @platformToken
+#    b. Run the organization login request to get @orgToken
+#    c. Copy tokens and update the variables at the top
+# 7. Click "Send Request" above any ### request
+#
+# SAMPLE CREDENTIALS:
+# Platform Admin: admin@genzura.com / admin123
+# Organization User (SuperAdmin): john.doe@democompany.com / user123
+#
+# IMPORTANT CHANGES FROM UUID VERSION:
+# - All IDs are now integers (1, 2, 3, etc.) instead of UUIDs
+# - API responses now have integer IDs in the format {"data": {"id": 1, ...}}
+# - Database auto-generates integer IDs, no need to provide them in POST requests
+# - Path parameters use integers: /organizations/1 instead of /organizations/uuid
+#
+# TESTING WORKFLOW:
+# 1. Run ./quick_test_int_ids.sh to create test data and get real IDs
+# 2. Update the @orgId, @branchId, @employeeId variables above with real values
+# 3. Login to get fresh tokens
+# 4. Use the REST Client to test individual endpoints
+# 5. Check server logs for detailed error information

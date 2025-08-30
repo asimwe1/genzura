@@ -149,7 +149,7 @@ export default function LoginPage() {
       if (response?.status === "success" && response.data?.token) {
         // Store token and user info
         if (typeof window !== "undefined") {
-          localStorage.setItem("authToken", response.data.token);
+        localStorage.setItem("token", response.data.token);
           localStorage.setItem("userRole", response.data.user?.role || "user");
           localStorage.setItem("businessType", portalType);
           localStorage.setItem("isAuth", "true"); // This is what AuthGuard checks for!
@@ -463,7 +463,7 @@ export default function LoginPage() {
               <p>
                 Auth Token:{" "}
                 {typeof window !== "undefined"
-                  ? localStorage.getItem("authToken")
+                  ? localStorage.getItem("token")
                     ? "Present"
                     : "Missing"
                   : "N/A"}
