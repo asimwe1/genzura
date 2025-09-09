@@ -1,6 +1,6 @@
 "use client"
 
-import { Building2, FileText, Home, Package, Settings, Truck, Users, Wallet, MoreHorizontal, Crown, Bot, Shield } from "lucide-react"
+import { Building2, FileText, Home, Package, Settings, Truck, Users, Wallet, MoreHorizontal, Crown, Bot, Shield, Wrench } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import React, { useState } from "react"
@@ -32,6 +32,11 @@ const menuItems = [
     title: "products",
     url: "/products",
     icon: Package,
+  },
+  {
+    title: "Services",
+    url: "/services",
+    icon: Wrench,
   },
   {
     title: "Reports",
